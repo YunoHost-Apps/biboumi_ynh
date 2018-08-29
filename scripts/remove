@@ -16,20 +16,9 @@ source /usr/share/yunohost/helpers
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-port=$(ynh_app_setting_get $app port)
-db_name=$(ynh_app_setting_get $app db_name)
-db_user=$db_name
-final_path=$(ynh_app_setting_get $app final_path)
 
 #=================================================
 # STANDARD REMOVE
-#=================================================
-# STOP AND REMOVE SERVICE
-#=================================================
-
-# Remove the dedicated systemd config
-ynh_remove_systemd_config
-
 #=================================================
 # REMOVE SERVICE FROM ADMIN PANEL
 #=================================================
@@ -45,74 +34,27 @@ fi
 # REMOVE DEPENDENCIES
 #=================================================
 
+rm -f /etc/biboumi/biboumi.cfg
+
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
-
-#=================================================
-# REMOVE THE MYSQL DATABASE
-#=================================================
-
-# Remove a database if it exists, along with the associated user
-ynh_mysql_remove_db $db_user $db_name
-
-#=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-
-# Remove the app directory securely
-ynh_secure_remove "$final_path"
-
-#=================================================
-# REMOVE NGINX CONFIGURATION
-#=================================================
-
-# Remove the dedicated nginx config
-ynh_remove_nginx_config
-
-#=================================================
-# REMOVE PHP-FPM CONFIGURATION
-#=================================================
-
-# Remove the dedicated php-fpm config
-ynh_remove_fpm_config
+rm -rf /var/lib/biboumi
+rm -rf /var/log/biboumi
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
 
 # Remove the app-specific logrotate config
-ynh_remove_logrotate
+#ynh_remove_logrotate
+# TODO ynh_remove_logrotate
 
-#=================================================
-# CLOSE A PORT
-#=================================================
 
-if yunohost firewall list | grep -q "\- $port$"
-then
-	echo "Close port $port" >&2
-	yunohost firewall disallow TCP $port 2>&1
-fi
+## XXX these 2 variables are also defined in install. Dear maintainer, please merge these somewhere else. In _common?
+MARKER_START="-- START Patch from biboumi_ynh"
+MARKER_END="-- END Patch from biboumi_ynh"
 
-#=================================================
-# SPECIFIC REMOVE
-#=================================================
-# REMOVE THE CRON FILE
-#=================================================
+sed -i "/${MARKER_START}/,/${MARKER_END}/d" /etc/metronome/metronome.cfg.lua
 
-# Remove a cron file
-ynh_secure_remove "/etc/cron.d/$app"
-
-# Remove a directory securely
-ynh_secure_remove "/etc/$app/"
-
-# Remove the log files
-ynh_secure_remove "/var/log/$app/"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
-#=================================================
-
-# Delete a system user
-ynh_system_user_delete $app
+# Remove stretch-backports config file if exists
+rm -f /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
