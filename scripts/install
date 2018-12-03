@@ -28,6 +28,11 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$YNH_APP_ARG_DOMAIN
 admin=$YNH_APP_ARG_ADMIN
 
+if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
+then
+  ynh_die "Upgrade your kernel first. Unsupported version: $(uname -r)"
+fi
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
