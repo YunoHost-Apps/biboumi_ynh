@@ -73,7 +73,7 @@ ynh_restore_file "/etc/logrotate.d/$app"
 #=================================================
 
 # Restore permissions on app files
-chown _biboumi /var/log/biboumi /var/lib/biboumi
+chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 
 #=================================================
 # RESTORE THE METRONOME CONFIG
