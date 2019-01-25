@@ -79,7 +79,7 @@ chown _biboumi /var/log/biboumi /var/lib/biboumi
 # RESTORE THE METRONOME CONFIG
 #=================================================
 
-ynh_backup "/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_restore_file "/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # GENERIC FINALIZATION
