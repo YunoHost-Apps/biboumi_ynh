@@ -6,15 +6,15 @@
         "en": "XMPP gateway for the IRC network.",
         "fr": "Passerelle XMPP pour le réseau IRC."
     },
-    "version": "8.0~ynh1",
+    "version": "8~ynh2",
     "url": "https://biboumi.louiz.org/",
-    "license": "free",
+    "license": "Zlib",
     "maintainer": {
         "name": "pitchum",
         "email": "pitchum@yunohost.org"
     },
     "requirements": {
-        "yunohost": ">= 3.0.0"
+        "yunohost": ">= 3.3.3"
     },
     "multi_instance": false,
     "services": [
