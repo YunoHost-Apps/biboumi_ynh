@@ -15,8 +15,6 @@ source /usr/share/yunohost/helpers
 
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
-
 #=================================================
 # STANDARD REMOVE
 #=================================================
@@ -34,27 +32,40 @@ fi
 # REMOVE DEPENDENCIES
 #=================================================
 
-rm -f /etc/biboumi/biboumi.cfg
-
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
-rm -rf /var/lib/biboumi
-rm -rf /var/log/biboumi
+
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+
+# Remove the app directory securely
+ynh_secure_remove "/etc/biboumi"
+ynh_secure_remove "/var/lib/biboumi"
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
 
 # Remove the app-specific logrotate config
-#ynh_remove_logrotate
-# TODO ynh_remove_logrotate
+ynh_remove_logrotate
 
+#=================================================
+# SPECIFIC REMOVE
+#=================================================
+# REMOVE LOGS
+#=================================================
 
-## XXX these 2 variables are also defined in install. Dear maintainer, please merge these somewhere else. In _common?
-MARKER_START="-- START Patch from biboumi_ynh"
-MARKER_END="-- END Patch from biboumi_ynh"
+ynh_secure_remove "/var/log/biboumi"
 
-sed -i "/${MARKER_START}/,/${MARKER_END}/d" /etc/metronome/metronome.cfg.lua
+#=================================================
+# REMOVE BACKPORTS LIST
+#=================================================
 
-# Remove stretch-backports config file if exists
-rm -f /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
+ynh_secure_remove "/etc/apt/sources.list.d/${app}_needs_stretch-backports.list"
+
+#=================================================
+# REMOVE METRONOME COMPONENT
+#=================================================
+
+ynh_secure_remove "/etc/metronome/conf.d/biboumi.cfg.lua"

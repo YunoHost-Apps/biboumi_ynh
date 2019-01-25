@@ -1,18 +1,12 @@
 #!/bin/bash
 
-# ============= FUTURE YUNOHOST HELPER =============
-# Delete a file checksum from the app settings
-#
-# $app should be defined when calling this helper
-#
-# usage: ynh_remove_file_checksum file
-# | arg: file - The file for which the checksum will be deleted
-ynh_delete_file_checksum () {
-	local checksum_setting_name=checksum_${1//[\/ ]/_}	# Replace all '/' and ' ' by '_'
-	ynh_app_setting_delete $app $checksum_setting_name
-}
+#=================================================
+# FUTUR OFFICIAL HELPERS
+#=================================================
 
 # Internal helper design to allow helpers to use getopts to manage their arguments
+#
+# [internal]
 #
 # example: function my_helper()
 # {
@@ -63,33 +57,33 @@ ynh_handle_getopts_args () {
 
 		# For each option in the array, reduce to short options for getopts (e.g. for [u]=user, --user will be -u)
 		# And built parameters string for getopts
-		# ${!args_array[@]} is the list of all keys in the array (A key is 'u' in [u]=user, user is a value)
+		# ${!args_array[@]} is the list of all option_flags in the array (An option_flag is 'u' in [u]=user, user is a value)
 		local getopts_parameters=""
-		local key=""
-		for key in "${!args_array[@]}"
+		local option_flag=""
+		for option_flag in "${!args_array[@]}"
 		do
-			# Concatenate each keys of the array to build the string of arguments for getopts
+			# Concatenate each option_flags of the array to build the string of arguments for getopts
 			# Will looks like 'abcd' for -a -b -c -d
-			# If the value of a key finish by =, it's an option with additionnal values. (e.g. --user bob or -u bob)
-			# Check the last character of the value associate to the key
-			if [ "${args_array[$key]: -1}" = "=" ]
+			# If the value of an option_flag finish by =, it's an option with additionnal values. (e.g. --user bob or -u bob)
+			# Check the last character of the value associate to the option_flag
+			if [ "${args_array[$option_flag]: -1}" = "=" ]
 			then
 				# For an option with additionnal values, add a ':' after the letter for getopts.
-				getopts_parameters="${getopts_parameters}${key}:"
+				getopts_parameters="${getopts_parameters}${option_flag}:"
 			else
-				getopts_parameters="${getopts_parameters}${key}"
+				getopts_parameters="${getopts_parameters}${option_flag}"
 			fi
 			# Check each argument given to the function
 			local arg=""
 			# ${#arguments[@]} is the size of the array
 			for arg in `seq 0 $(( ${#arguments[@]} - 1 ))`
 			do
-				# And replace long option (value of the key) by the short option, the key itself
+				# And replace long option (value of the option_flag) by the short option, the option_flag itself
 				# (e.g. for [u]=user, --user will be -u)
 				# Replace long option with =
-				arguments[arg]="${arguments[arg]//--${args_array[$key]}/-${key} }"
+				arguments[arg]="${arguments[arg]//--${args_array[$option_flag]}/-${option_flag} }"
 				# And long option without =
-				arguments[arg]="${arguments[arg]//--${args_array[$key]%=}/-${key}}"
+				arguments[arg]="${arguments[arg]//--${args_array[$option_flag]%=}/-${option_flag}}"
 			done
 		done
 
@@ -108,10 +102,10 @@ ynh_handle_getopts_args () {
 
 				if [ "$parameter" = "?" ]
 				then
-					ynh_die "Invalid argument: -${OPTARG:-}"
+					ynh_die --message="Invalid argument: -${OPTARG:-}"
 				elif [ "$parameter" = ":" ]
 				then
-					ynh_die "-$OPTARG parameter requires an argument."
+					ynh_die --message="-$OPTARG parameter requires an argument."
 				else
 					local shift_value=1
 					# Use the long option, corresponding to the short option read by getopts, as a variable
@@ -139,19 +133,20 @@ ynh_handle_getopts_args () {
 							shift_value=$(( shift_value - 1 ))
 						fi
 
+						# Declare the content of option_var as a variable.
+						eval ${option_var}=""
 						# Then read the array value per value
+						local i
 						for i in `seq 0 $(( ${#all_args[@]} - 1 ))`
 						do
 							# If this argument is an option, end here.
-							if [ "${all_args[$i]:0:1}" == "-" ] || [ -z "${all_args[$i]}" ]
+							if [ "${all_args[$i]:0:1}" == "-" ]
 							then
 								# Ignore the first value of the array, which is the option itself
 								if [ "$i" -ne 0 ]; then
 									break
 								fi
 							else
-								# Declare the content of option_var as a variable.
-								eval ${option_var}=""
 								# Else, add this value to this option
 								# Each value will be separated by ';'
 								if [ -n "${!option_var}" ]
@@ -175,25 +170,33 @@ ynh_handle_getopts_args () {
 		# Check if there's getopts arguments
 		if [ "${arguments[0]:0:1}" != "-" ]
 		then
-			# If not, enter in legacy mode and manage the arguments as positionnal ones.
-			echo "! Helper used in legacy mode !"
+			# If not, enter in legacy mode and manage the arguments as positionnal ones..
+			# Dot not echo, to prevent to go through a helper output. But print only in the log.
+			set -x; echo "! Helper used in legacy mode !" > /dev/null; set +x
+			local i
 			for i in `seq 0 $(( ${#arguments[@]} -1 ))`
 			do
-				# Use getopts_parameters as a list of key of the array args_array
+				# Try to use legacy_args as a list of option_flag of the array args_array
+				# Otherwise, fallback to getopts_parameters to get the option_flag. But an associative arrays isn't always sorted in the correct order...
 				# Remove all ':' in getopts_parameters
-				getopts_parameters=${getopts_parameters//:}
-				# Get the key from getopts_parameters, by using the key according to the position of the argument.
-				key=${getopts_parameters:$i:1}
-				# Use the long option, corresponding to the key, as a variable
+				getopts_parameters=${legacy_args:-${getopts_parameters//:}}
+				# Get the option_flag from getopts_parameters, by using the option_flag according to the position of the argument.
+				option_flag=${getopts_parameters:$i:1}
+				if [ -z "$option_flag" ]; then
+						ynh_print_warn --message="Too many arguments ! \"${arguments[$i]}\" will be ignored."
+						continue
+				fi
+				# Use the long option, corresponding to the option_flag, as a variable
 				# (e.g. for [u]=user, 'user' will be used as a variable)
 				# Also, remove '=' at the end of the long option
 				# The variable name will be stored in 'option_var'
-				local option_var="${args_array[$key]%=}"
+				local option_var="${args_array[$option_flag]%=}"
 
 				# Store each value given as argument in the corresponding variable
 				# The values will be stored in the same order than $args_array
 				eval ${option_var}+=\"${arguments[$i]}\"
 			done
+			unset legacy_args
 		else
 			# END LEGACY MODE
 			# Call parse_arg and pass the modified list of args as an array of arguments.
@@ -202,6 +205,136 @@ ynh_handle_getopts_args () {
 	fi
 	set -x
 }
+
+#=================================================
+
+# Read the value of a key in a ynh manifest file
+#
+# usage: ynh_read_manifest manifest key
+# | arg: -m, --manifest= - Path of the manifest to read
+# | arg: -k, --key= - Name of the key to find
+ynh_read_manifest () {
+	# Declare an array to define the options of this helper.
+	declare -Ar args_array=( [m]=manifest= [k]=manifest_key= )
+	local manifest
+	local manifest_key
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+
+	python3 -c "import sys, json;print(json.load(open('$manifest', encoding='utf-8'))['$manifest_key'])"
+}
+
+# Read the upstream version from the manifest
+# The version number in the manifest is defined by <upstreamversion>~ynh<packageversion>
+# For example : 4.3-2~ynh3
+# This include the number before ~ynh
+# In the last example it return 4.3-2
+#
+# usage: ynh_app_upstream_version [-m manifest]
+# | arg: -m, --manifest= - Path of the manifest to read
+ynh_app_upstream_version () {
+	declare -Ar args_array=( [m]=manifest= )
+	local manifest
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+
+	manifest="${manifest:-../manifest.json}"
+	if [ ! -e "$manifest" ]; then
+		manifest="../settings/manifest.json"	# Into the restore script, the manifest is not at the same place
+	fi
+	version_key=$(ynh_read_manifest --manifest="$manifest" --manifest_key="version")
+	echo "${version_key/~ynh*/}"
+}
+
+# Read package version from the manifest
+# The version number in the manifest is defined by <upstreamversion>~ynh<packageversion>
+# For example : 4.3-2~ynh3
+# This include the number after ~ynh
+# In the last example it return 3
+#
+# usage: ynh_app_package_version [-m manifest]
+# | arg: -m, --manifest= - Path of the manifest to read
+ynh_app_package_version () {
+	declare -Ar args_array=( [m]=manifest= )
+	local manifest
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+
+	manifest="${manifest:-../manifest.json}"
+	if [ ! -e "$manifest" ]; then
+		manifest="../settings/manifest.json"	# Into the restore script, the manifest is not at the same place
+	fi
+	version_key=$(ynh_read_manifest --manifest="$manifest" --manifest_key="version")
+	echo "${version_key/*~ynh/}"
+}
+
+# Checks the app version to upgrade with the existing app version and returns:
+# - UPGRADE_APP if the upstream app version has changed
+# - UPGRADE_PACKAGE if only the YunoHost package has changed
+#
+## It stops the current script without error if the package is up-to-date
+#
+# This helper should be used to avoid an upgrade of an app, or the upstream part
+# of it, when it's not needed
+#
+# To force an upgrade, even if the package is up to date,
+# you have to set the variable YNH_FORCE_UPGRADE before.
+# example: sudo YNH_FORCE_UPGRADE=1 yunohost app upgrade MyApp
+#
+# usage: ynh_check_app_version_changed
+ynh_check_app_version_changed () {
+	local force_upgrade=${YNH_FORCE_UPGRADE:-0}
+	local package_check=${PACKAGE_CHECK_EXEC:-0}
+
+	# By default, upstream app version has changed
+	local return_value="UPGRADE_APP"
+
+	local current_version=$(ynh_read_manifest --manifest="/etc/yunohost/apps/$YNH_APP_INSTANCE_NAME/manifest.json" --manifest_key="version" || echo 1.0)
+	local current_upstream_version="$(ynh_app_upstream_version --manifest="/etc/yunohost/apps/$YNH_APP_INSTANCE_NAME/manifest.json")"
+	local update_version=$(ynh_read_manifest --manifest="../manifest.json" --manifest_key="version" || echo 1.0)
+	local update_upstream_version="$(ynh_app_upstream_version)"
+
+	if [ "$current_version" == "$update_version" ] ; then
+		# Complete versions are the same
+		if [ "$force_upgrade" != "0" ]
+		then
+			echo "Upgrade forced by YNH_FORCE_UPGRADE." >&2
+			unset YNH_FORCE_UPGRADE
+		elif [ "$package_check" != "0" ]
+		then
+			echo "Upgrade forced for package check." >&2
+		else
+			ynh_die "Up-to-date, nothing to do" 0
+		fi
+	elif [ "$current_upstream_version" == "$update_upstream_version" ] ; then
+		# Upstream versions are the same, only YunoHost package versions differ
+		return_value="UPGRADE_PACKAGE"
+	fi
+	echo $return_value
+}
+
+#=================================================
+
+# Delete a file checksum from the app settings
+#
+# $app should be defined when calling this helper
+#
+# usage: ynh_remove_file_checksum file
+# | arg: -f, --file= - The file for which the checksum will be deleted
+ynh_delete_file_checksum () {
+	# Declare an array to define the options of this helper.
+	declare -Ar args_array=( [f]=file= )
+	local file
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+
+	local checksum_setting_name=checksum_${file//[\/ ]/_}	# Replace all '/' and ' ' by '_'
+	ynh_app_setting_delete $app $checksum_setting_name
+}
+
+#=================================================
+# EXPERIMENTAL HELPERS
+#=================================================
 
 # Start (or other actions) a service,  print a log in case of failure and optionnaly wait until the service is completely started
 #
@@ -214,71 +347,72 @@ ynh_handle_getopts_args () {
 # | arg: -t, --timeout=      - Timeout - The maximum time to wait before ending the watching. Default : 300 seconds.
 # | arg: -e, --length=       - Length of the error log : Default : 20
 ynh_systemd_action() {
-    # Declare an array to define the options of this helper.
-    declare -Ar args_array=( [n]=service_name= [a]=action= [l]=line_match= [p]=log_path= [t]=timeout= [e]=length= )
-    local service_name
-    local action
-    local line_match
-    local length
-    local log_path
-    local timeout
+	# Declare an array to define the options of this helper.
+	declare -Ar args_array=( [n]=service_name= [a]=action= [l]=line_match= [p]=log_path= [t]=timeout= [e]=length= )
+	local service_name
+	local action
+	local line_match
+	local length
+	local log_path
+	local timeout
 
-    # Manage arguments with getopts
-    ynh_handle_getopts_args "$@"
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
 
-    local service_name="${service_name:-$app}"
-    local action=${action:-start}
-    local log_path="${log_path:-/var/log/$service_name/$service_name.log}"
-    local length=${length:-20}
-    local timeout=${timeout:-300}
+	local service_name="${service_name:-$app}"
+	local action=${action:-start}
+	local log_path="${log_path:-/var/log/$service_name/$service_name.log}"
+	local length=${length:-20}
+	local timeout=${timeout:-300}
 
-    # Start to read the log
-    if [[ -n "${line_match:-}" ]]
-    then
-        local templog="$(mktemp)"
+	# Start to read the log
+	if [[ -n "${line_match:-}" ]]
+	then
+		local templog="$(mktemp)"
 	# Following the starting of the app in its log
 	if [ "$log_path" == "systemd" ] ; then
-            # Read the systemd journal
-            journalctl -u $service_name -f --since=-45 > "$templog" &
+		# Read the systemd journal
+		journalctl -u $service_name -f --since=-45 > "$templog" &
 	else
-            # Read the specified log file
-            tail -F -n0 "$log_path" > "$templog" &
+		# Read the specified log file
+		tail -F -n0 "$log_path" > "$templog" &
 	fi
-        # Get the PID of the tail command
-        local pid_tail=$!
-    fi
+		# Get the PID of the tail command
+		local pid_tail=$!
+	fi
 
-    echo "${action^} the service $service_name" >&2
-    systemctl $action $service_name \
-        || ( journalctl --lines=$length -u $service_name >&2 \
-        ; test -n "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2 \
-        ; false )
+	echo "${action^} the service $service_name" >&2
+	systemctl $action $service_name \
+		|| ( journalctl --lines=$length -u $service_name >&2 \
+		; test -n "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2 \
+		; false )
 
-    # Start the timeout and try to find line_match
-    if [[ -n "${line_match:-}" ]]
-    then
-        local i=0
-        for i in `seq 1 $timeout`
-        do
-            # Read the log until the sentence is found, that means the app finished to start. Or run until the timeout
-            if grep --quiet "$line_match" "$templog"
-            then
-                echo "The service $service_name has correctly started." >&2
-                break
-            fi
-            echo -n "." >&2
-            sleep 1
-        done
-        if [ $i -eq $timeout ]
-        then
-            echo "The service $service_name didn't fully started before the timeout." >&2
-            journalctl --lines=$length -u $service_name >&2
-            test -n "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2
-        fi
+	# Start the timeout and try to find line_match
+	if [[ -n "${line_match:-}" ]]
+	then
+		local i=0
+		for i in $(seq 1 $timeout)
+		do
+			# Read the log until the sentence is found, that means the app finished to start. Or run until the timeout
+			if grep --quiet "$line_match" "$templog"
+			then
+				echo "The service $service_name has correctly started." >&2
+				break
+			fi
+			echo -n "." >&2
+			sleep 1
+		done
+		if [ $i -eq $timeout ]
+		then
+			echo "The service $service_name didn't fully started before the timeout." >&2
+			echo "Please find here an extract of the end of the log of the service $service_name:"
+			journalctl --lines=$length -u $service_name >&2
+			test -n "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2
+		fi
 
-        echo ""
-        ynh_clean_check_starting
-    fi
+		echo ""
+		ynh_clean_check_starting
+	fi
 }
 
 # Clean temporary process and file used by ynh_check_starting

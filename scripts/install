@@ -13,10 +13,6 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-ynh_clean_setup () {
-	### Remove this function if there's nothing to clean before calling the remove script.
-	true
-}
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
@@ -24,29 +20,26 @@ ynh_abort_if_errors
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-app=$YNH_APP_INSTANCE_NAME
 domain=$YNH_APP_ARG_DOMAIN
 admin=$YNH_APP_ARG_ADMIN
 
-if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
-then
-  ynh_die "Upgrade your kernel first. Unsupported version: $(uname -r)"
-fi
+app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
 
-### If the app uses nginx as web server (written in HTML/PHP in most cases), the final path should be "/var/www/$app".
-### If the app provides an internal web server (or uses another application server such as uwsgi), the final path should be "/opt/yunohost/$app"
-#final_path=/var/lib/biboumi
-#test ! -e "$final_path" || ynh_die "This path already contains a folder"
+if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
+then
+    ynh_die "Upgrade your kernel first. Unsupported version: $(uname -r)"
+fi
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-# Nothing special here.
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app admin $admin
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -54,27 +47,13 @@ fi
 # FIND AND OPEN A PORT
 #=================================================
 
-### Use these lines if you have to open a port for the application
-### `ynh_find_port` will find the first available port starting from the given port.
-### If you're not using these lines:
-###		- Remove the section "CLOSE A PORT" in the remove script
-
-## Find a free port
-#port=$(ynh_find_port 8095)
-## Open this port
-#yunohost firewall allow --no-upnp TCP $port 2>&1
-#ynh_app_setting_set $app port $port
+# Find a free port
+port=$(ynh_find_port 113)
+ynh_app_setting_set $app port $port
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-
-### `ynh_install_app_dependencies` allows you to add any "apt" dependencies to the package.
-### Those deb packages will be installed as dependencies of this package.
-### If you're not using this helper:
-###		- Remove the section "REMOVE DEPENDENCIES" in the remove script
-###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
-###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
 
 # Make sure that stretch-backports is enabled
 if ! apt-cache policy | grep 'stretch-backports/main'
@@ -88,7 +67,7 @@ ynh_install_app_dependencies biboumi
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# ...
+# CONFIGURE BIBOUMI
 #=================================================
 
 # Create a secret password that will be shared by metronome and biboumi.
@@ -97,84 +76,52 @@ shared_secret="$(ynh_string_random 25)"
 # Biboumi needs at least one admin JID.
 admin_jid="${admin}@biboumi.${domain}"
 
+biboumi_config_file="/etc/biboumi/biboumi.cfg"
+
 # Create the biboumi config file.
-cp ../conf/biboumi.cfg /etc/biboumi/
-ynh_replace_string __DOMAIN__ "${domain}" /etc/biboumi/biboumi.cfg
-ynh_replace_string __SECRET__ "${shared_secret}" /etc/biboumi/biboumi.cfg
-ynh_replace_string __ADMIN_JID__ "${admin_jid}" /etc/biboumi/biboumi.cfg
-
-MARKER_START="-- START Patch from biboumi_ynh"
-MARKER_END="-- END Patch from biboumi_ynh"
-
-# Patch metronome's main config file.
-metronome_component="\
-${MARKER_START}\\n\
-Component \"biboumi.${domain}\"\\n\
-    component_secret = \"${shared_secret}\"\\n\
-${MARKER_END}\\n"
-
-# Try to detect if metronome's main config file was not patched yet.
-if grep -q -- "${MARKER_START}" /etc/metronome/metronome.cfg.lua
-then
-	echo "Metronome's configuration file is already patched. This is unexpected. Cowardly aborting installation..."
-	ynh_die 42
-fi
-
-#sed -i "s/----------- Virtual hosts/${metronome_component}----------- Virtual hosts/" /etc/metronome/metronome.cfg.lua
-ynh_replace_string "^----------- Virtual hosts" "${metronome_component}&" /etc/metronome/metronome.cfg.lua
-
-
-mkdir -p /var/log/biboumi /var/lib/biboumi
-chown _biboumi /var/log/biboumi /var/lib/biboumi
-
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-
-### `ynh_store_file_checksum` is used to store the checksum of a file.
-### That way, during the upgrade script, by using `ynh_backup_if_checksum_is_different`,
-### you can make a backup of this file before modifying it again if the admin had modified it.
+cp ../conf/biboumi.cfg "$biboumi_config_file"
+ynh_replace_string __DOMAIN__ "${domain}" "$biboumi_config_file"
+ynh_replace_string __SECRET__ "${shared_secret}" "$biboumi_config_file"
+ynh_replace_string __PORT__ "${port}" "$biboumi_config_file"
+ynh_replace_string __ADMIN_JID__ "${admin_jid}" "$biboumi_config_file"
 
 # Calculate and store the config file checksum into the app settings
-#ynh_store_file_checksum "$final_path/CONFIG_FILE"
+ynh_store_file_checksum "$biboumi_config_file"
+
+#=================================================
+# CONFIGURE METRONOME
+#=================================================
+
+# Add metronome component
+cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
+ynh_replace_string __DOMAIN__ "${domain}" /etc/metronome/conf.d/biboumi.cfg.lua
+ynh_replace_string __SECRET__ "${shared_secret}" /etc/metronome/conf.d/biboumi.cfg.lua
+
+#=================================================
+# CREATE DIRECTORIES
+#=================================================
+
+mkdir -p /var/log/biboumi /var/lib/biboumi
+
+# Set permissions to app files
+chown _biboumi /var/log/biboumi /var/lib/biboumi
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
 
-### `ynh_use_logrotate` is used to configure a logrotate configuration for the logs of this app.
-### Use this helper only if there is effectively a log file for this app.
-### If you're not using this helper:
-###		- Remove the section "BACKUP LOGROTATE" in the backup script
-###		- Remove also the section "REMOVE LOGROTATE CONFIGURATION" in the remove script
-###		- As well as the section "RESTORE THE LOGROTATE CONFIGURATION" in the restore script
-###		- And the section "SETUP LOGROTATE" in the upgrade script
-
 # Use logrotate to manage application logfile(s)
-#ynh_use_logrotate
-# TODO setup logrotate
+ynh_use_logrotate /var/log/biboumi/
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-### `yunohost service add` is a CLI yunohost command to add a service in the admin panel.
-### You'll find the service in the 'services' section of YunoHost admin panel.
-### This CLI command would be useless if the app does not have any services (systemd or sysvinit)
-### If you're not using these lines:
-###		- You can remove these files in conf/.
-###		- Remove the section "REMOVE SERVICE FROM ADMIN PANEL" in the remove script
-###		- As well as the section ADVERTISE SERVICE IN ADMIN PANEL" in the restore script
-
-yunohost service add biboumi
-
-# TODO Try to make "yunohost service" able to display logs from journalctl
-# yunohost service add biboumi --log "/var/log/FILE.log"
-
+yunohost service add biboumi --log "/var/log/biboumi/biboumi.log"
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
 
-ynh_systemd_action -a restart -n metronome
-ynh_systemd_action -a restart -n biboumi -p /var/log/biboumi/biboumi.log
+ynh_systemd_action --action=restart --service_name=metronome
+ynh_systemd_action --action=restart --service_name=biboumi
