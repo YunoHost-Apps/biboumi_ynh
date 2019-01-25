@@ -104,7 +104,7 @@ ynh_replace_string __SECRET__ "${shared_secret}" /etc/metronome/conf.d/biboumi.c
 mkdir -p /var/log/biboumi /var/lib/biboumi
 
 # Set permissions to app files
-chown _biboumi /var/log/biboumi /var/lib/biboumi
+chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 
 #=================================================
 # SETUP LOGROTATE

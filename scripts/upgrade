@@ -100,7 +100,7 @@ ynh_use_logrotate /var/log/biboumi/ --non-append
 #=================================================
 
 # Set permissions on app files
-chown _biboumi /var/log/biboumi /var/lib/biboumi
+chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 
 #=================================================
 # RELOAD SERVICES
