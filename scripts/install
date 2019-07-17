@@ -120,6 +120,13 @@ ynh_use_logrotate /var/log/biboumi/
 yunohost service add biboumi --log "/var/log/biboumi/biboumi.log"
 
 #=================================================
+# SET THE APP AS NOT USING THE SSO
+#=================================================
+
+# Prevent conflict with other apps on the same domain
+ynh_app_setting_set $app no_sso 1
+
+#=================================================
 # RELOAD SERVICES
 #=================================================
 
