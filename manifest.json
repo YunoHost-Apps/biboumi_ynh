@@ -6,7 +6,7 @@
         "en": "XMPP gateway for the IRC network.",
         "fr": "Passerelle XMPP pour le réseau IRC."
     },
-    "version": "8~ynh2",
+    "version": "8.3~ynh2",
     "url": "https://biboumi.louiz.org/",
     "license": "Zlib",
     "maintainer": {
