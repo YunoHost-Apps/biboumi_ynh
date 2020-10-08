@@ -37,7 +37,7 @@ fi
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..." --time --weight=1
+ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=admin --value=admin
@@ -47,7 +47,7 @@ ynh_app_setting_set --app=$app --key=admin --value=admin
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Configuring firewall..." --time --weight=1
+ynh_script_progression --message="Configuring firewall..." --weight=2
 
 # Find a free port
 port=$(ynh_find_port --port=113)
@@ -56,14 +56,7 @@ ynh_app_setting_set --app=$app --key=port --value=$port
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --time --weight=1
-
-# Make sure that stretch-backports is enabled
-# if ! apt-cache policy | grep 'stretch-backports/main'
-# then
-# 	echo "deb http://ftp.fr.debian.org/debian/ stretch-backports main" | sudo tee /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
-# 	echo "Adding stretch-backports repository..."
-# fi
+ynh_script_progression --message="Installing dependencies..." --weight=9
 
 ynh_install_app_dependencies $pkg_dependencies
 
@@ -112,6 +105,7 @@ chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 #=================================================
 # SETUP LOGROTATE
 #=================================================
+ynh_script_progression --message="Configuring log rotation..." --weight=1
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate /var/log/biboumi/
@@ -120,14 +114,14 @@ ynh_use_logrotate /var/log/biboumi/
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add biboumi --log "/var/log/biboumi/biboumi.log"
+yunohost service add biboumi --description "XMPP gateway for the IRC network" --log "/var/log/biboumi/biboumi.log"
 
 #=================================================
 # SET THE APP AS NOT USING THE SSO
 #=================================================
 
 # Prevent conflict with other apps on the same domain
-ynh_app_setting_set $app no_sso 1
+ynh_app_setting_set --app=$app --key=no_sso --value=1
 
 #=================================================
 # RELOAD SERVICES
@@ -140,4 +134,4 @@ ynh_systemd_action --action=restart --service_name=biboumi
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --time --last
+ynh_script_progression --message="Installation of Biboumi completed" --last
