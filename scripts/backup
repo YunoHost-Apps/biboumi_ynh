@@ -19,13 +19,17 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_print_info --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
 
 #=================================================
-# STANDARD BACKUP STEPS
+# DECLARE DATA AND CONF FILES TO BACKUP
+#=================================================
+ynh_print_info --message="Declaring files to be backed up..."
+
 #=================================================
 # BACKUP THE APP MAIN DIR
 #=================================================
@@ -33,8 +37,6 @@ domain=$(ynh_app_setting_get $app domain)
 ynh_backup "/etc/biboumi"
 ynh_backup "/var/lib/biboumi"
 
-#=================================================
-# SPECIFIC BACKUP
 #=================================================
 # BACKUP LOGROTATE
 #=================================================
@@ -46,3 +48,9 @@ ynh_backup "/etc/logrotate.d/$app"
 #=================================================
 
 ynh_backup "/etc/metronome/conf.d/biboumi.cfg.lua"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info --message="Backup script completed for Biboumi. (YunoHost will then actually copy those files to the archive)."

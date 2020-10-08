@@ -6,7 +6,7 @@
         "en": "XMPP gateway for the IRC network.",
         "fr": "Passerelle XMPP pour le réseau IRC."
     },
-    "version": "8~ynh2",
+    "version": "8.3~ynh2",
     "url": "https://biboumi.louiz.org/",
     "license": "Zlib",
     "maintainer": {
@@ -14,7 +14,7 @@
         "email": "pitchum@yunohost.org"
     },
     "requirements": {
-        "yunohost": ">= 3.3.3"
+        "yunohost": ">= 3.8.1"
     },
     "multi_instance": false,
     "services": [
@@ -26,8 +26,8 @@
                 "name": "domain",
                 "type": "domain",
                 "ask": {
-                    "en": "Choose the domain that will host biboumi.",
-                    "fr": "Choisissez le nom de domaine qui hébergera biboumi."
+                    "en": "Choose the domain that will host Biboumi.",
+                    "fr": "Choisissez le nom de domaine qui hébergera Biboumi."
                 },
                 "example": "example.com"
             },
