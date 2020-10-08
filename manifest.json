@@ -14,7 +14,7 @@
         "email": "pitchum@yunohost.org"
     },
     "requirements": {
-        "yunohost": ">= 3.8.1"
+        "yunohost": ">= 4.0.3"
     },
     "multi_instance": false,
     "services": [
