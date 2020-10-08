@@ -25,14 +25,14 @@ app=$YNH_APP_INSTANCE_NAME
 # Remove a service from the admin panel, added by `yunohost service add`
 if yunohost service status | grep -q $app
 then
-	ynh_script_progression --message="Removing $app service integration..." --time --weight=1
+	ynh_script_progression --message="Removing $app service integration..." --weight=1
 	yunohost service remove $app
 fi
 
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Removing dependencies..." --weight=3
+ynh_script_progression --message="Removing dependencies..." --weight=4
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
@@ -72,4 +72,4 @@ ynh_secure_remove "/etc/metronome/conf.d/biboumi.cfg.lua"
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Removal of $app completed" --last
+ynh_script_progression --message="Removal of Biboumi completed" --last
