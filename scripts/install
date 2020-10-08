@@ -37,32 +37,35 @@ fi
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
+ynh_script_progression --message="Storing installation settings..." --time --weight=1
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app admin $admin
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=admin --value=admin
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
+ynh_script_progression --message="Configuring firewall..." --time --weight=1
 
 # Find a free port
-port=$(ynh_find_port 113)
-ynh_app_setting_set $app port $port
+port=$(ynh_find_port --port=113)
+ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Installing dependencies..." --time --weight=1
 
 # Make sure that stretch-backports is enabled
-if ! apt-cache policy | grep 'stretch-backports/main'
-then
-	echo "deb http://ftp.fr.debian.org/debian/ stretch-backports main" | sudo tee /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
-	echo "Adding stretch-backports repository..."
-fi
+# if ! apt-cache policy | grep 'stretch-backports/main'
+# then
+# 	echo "deb http://ftp.fr.debian.org/debian/ stretch-backports main" | sudo tee /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
+# 	echo "Adding stretch-backports repository..."
+# fi
 
-ynh_install_app_dependencies biboumi
+ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC SETUP
@@ -80,10 +83,10 @@ biboumi_config_file="/etc/biboumi/biboumi.cfg"
 
 # Create the biboumi config file.
 cp ../conf/biboumi.cfg "$biboumi_config_file"
-ynh_replace_string __DOMAIN__ "${domain}" "$biboumi_config_file"
-ynh_replace_string __SECRET__ "${shared_secret}" "$biboumi_config_file"
-ynh_replace_string __PORT__ "${port}" "$biboumi_config_file"
-ynh_replace_string __ADMIN_JID__ "${admin_jid}" "$biboumi_config_file"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="$biboumi_config_file"
+ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="$biboumi_config_file"
+ynh_replace_string --match_string="__PORT__" --replace_string="${port}" --target_file="$biboumi_config_file"
+ynh_replace_string --match_string="__ADMIN_JID__" --replace_string="${admin_jid}" --target_file="$biboumi_config_file"
 
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum "$biboumi_config_file"
@@ -94,8 +97,8 @@ ynh_store_file_checksum "$biboumi_config_file"
 
 # Add metronome component
 cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
-ynh_replace_string __DOMAIN__ "${domain}" /etc/metronome/conf.d/biboumi.cfg.lua
-ynh_replace_string __SECRET__ "${shared_secret}" /etc/metronome/conf.d/biboumi.cfg.lua
+ynh_replace_string  --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_replace_string  --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # CREATE DIRECTORIES
@@ -132,3 +135,9 @@ ynh_app_setting_set $app no_sso 1
 
 ynh_systemd_action --action=restart --service_name=metronome
 ynh_systemd_action --action=restart --service_name=biboumi
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed" --time --last
