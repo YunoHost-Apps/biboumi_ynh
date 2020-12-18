@@ -27,8 +27,8 @@ You can configure Biboumi with the file `/etc/biboumi/biboumi.cfg`.
 
 #### Supported architectures
 
-* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/biboumi%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/biboumi/)
-* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/biboumi%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/biboumi/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/biboumi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/biboumi/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/biboumi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/biboumi/)
 
 ## Limitations
 
