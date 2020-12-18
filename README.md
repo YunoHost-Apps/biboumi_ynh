@@ -1,7 +1,7 @@
 # Biboumi for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)  
-[![Install biboumi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=biboumi)
+[![Install biboumi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 
 > *This package allows you to install Biboumi quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
