@@ -26,8 +26,8 @@
                 "name": "domain",
                 "type": "domain",
                 "ask": {
-                    "en": "Choose the domain that will host Biboumi.",
-                    "fr": "Choisissez le nom de domaine qui hébergera Biboumi."
+                    "en": "Choose a domain name for Biboumi.",
+                    "fr": "Choisissez un nom de domaine pour Biboumi."
                 },
                 "example": "example.com"
             },
