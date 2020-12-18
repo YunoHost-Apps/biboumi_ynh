@@ -56,7 +56,7 @@ ynh_restore_file "/var/lib/biboumi"
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add biboumi --description "XMPP gateway for the IRC network" --log "/var/log/biboumi/biboumi.log"
+yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION

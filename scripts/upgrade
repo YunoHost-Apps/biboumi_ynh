@@ -110,6 +110,12 @@ ynh_use_logrotate /var/log/biboumi/ --non-append
 chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 
 #=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
+
+#=================================================
 # RELOAD SERVICES
 #=================================================
 

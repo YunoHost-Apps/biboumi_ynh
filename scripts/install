@@ -114,7 +114,7 @@ ynh_use_logrotate /var/log/biboumi/
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add biboumi --description "XMPP gateway for the IRC network" --log "/var/log/biboumi/biboumi.log"
+yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
 
 #=================================================
 # SET THE APP AS NOT USING THE SSO
