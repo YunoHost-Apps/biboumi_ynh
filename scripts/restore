@@ -19,14 +19,16 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_script_progression --message="Loading installation settings..." --weight=1
 
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
+ynh_script_progression --message="Validating restoration parameters..." --weight=1
 
 if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
 then
@@ -38,15 +40,10 @@ fi
 #=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Reinstalling dependencies..." --weight=9
 
 # Make sure that stretch-backports is enabled
-if ! apt-cache policy | grep 'stretch-backports/main'
-then
-	echo "deb http://ftp.fr.debian.org/debian/ stretch-backports main" | sudo tee /etc/apt/sources.list.d/${app}_needs_stretch-backports.list
-	echo "Adding stretch-backports repository..."
-fi
-
-ynh_install_app_dependencies biboumi
+ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # RESTORE THE APP MAIN DIR
@@ -59,7 +56,7 @@ ynh_restore_file "/var/lib/biboumi"
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add biboumi --log "/var/log/biboumi/biboumi.log"
+yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
@@ -89,3 +86,9 @@ ynh_restore_file "/etc/metronome/conf.d/biboumi.cfg.lua"
 
 ynh_systemd_action --action=restart --service_name=metronome
 ynh_systemd_action --action=restart --service_name=biboumi
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Restoration completed for Biboumi" --last
