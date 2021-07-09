@@ -49,8 +49,8 @@ ynh_install_app_dependencies $pkg_dependencies
 # RESTORE THE APP MAIN DIR
 #=================================================
 
-ynh_restore_file "/etc/biboumi"
-ynh_restore_file "/var/lib/biboumi"
+ynh_restore_file --origin_path="/etc/biboumi"
+ynh_restore_file --origin_path="/var/lib/biboumi"
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
@@ -63,7 +63,7 @@ yunohost service add biboumi --description="XMPP gateway for the IRC network" --
 #=================================================
 
 mkdir -p /var/log/biboumi
-ynh_restore_file "/etc/logrotate.d/$app"
+ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
 #=================================================
 # RESTORE USER RIGHTS
@@ -76,7 +76,7 @@ chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
 # RESTORE THE METRONOME CONFIG
 #=================================================
 
-ynh_restore_file "/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_restore_file --origin_path="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -91,4 +91,4 @@ ynh_systemd_action --action=restart --service_name=biboumi
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for Biboumi" --last
+ynh_script_progression --message="Restoration completed for $app" --last

@@ -72,8 +72,6 @@ shared_secret="$(ynh_string_random 25)"
 # Biboumi needs at least one admin JID.
 admin_jid="${admin}@biboumi.${domain}"
 
-biboumi_config_file="/etc/biboumi/biboumi.cfg"
-
 ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
 
 #=================================================

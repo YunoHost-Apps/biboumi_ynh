@@ -43,8 +43,8 @@ ynh_remove_app_dependencies
 ynh_script_progression --message="Removing Biboumi directory..." --weight=2
 
 # Remove the app directory securely
-ynh_secure_remove "/etc/biboumi"
-ynh_secure_remove "/var/lib/biboumi"
+ynh_secure_remove --file="/etc/biboumi"
+ynh_secure_remove --file="/var/lib/biboumi"
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
@@ -60,16 +60,16 @@ ynh_remove_logrotate
 # REMOVE LOGS
 #=================================================
 
-ynh_secure_remove "/var/log/biboumi"
+ynh_secure_remove --file="/var/log/biboumi"
 
 #=================================================
 # REMOVE METRONOME COMPONENT
 #=================================================
 
-ynh_secure_remove "/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_secure_remove --file="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Removal of Biboumi completed" --last
+ynh_script_progression --message="Removal of $app completed" --last
