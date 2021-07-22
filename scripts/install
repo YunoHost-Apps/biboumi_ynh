@@ -67,31 +67,19 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 
 # Create a secret password that will be shared by metronome and biboumi.
-shared_secret="$(ynh_string_random 25)"
-
+secret="$(ynh_string_random 25)"
 # Biboumi needs at least one admin JID.
 admin_jid="${admin}@biboumi.${domain}"
-
 biboumi_config_file="/etc/biboumi/biboumi.cfg"
 
-# Create the biboumi config file.
-cp ../conf/biboumi.cfg "$biboumi_config_file"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__PORT__" --replace_string="${port}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__ADMIN_JID__" --replace_string="${admin_jid}" --target_file="$biboumi_config_file"
-
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$biboumi_config_file"
+ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
 
 #=================================================
 # CONFIGURE METRONOME
 #=================================================
 
 # Add metronome component
-cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
-ynh_replace_string  --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
-ynh_replace_string  --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # CREATE DIRECTORIES

@@ -63,25 +63,13 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 
 biboumi_config_file="/etc/biboumi/biboumi.cfg"
-
-# Verify the checksum of a file, stored by `ynh_store_file_checksum` in the install script.
-ynh_backup_if_checksum_is_different "$biboumi_config_file"
-
 # Get shared_secret from the config file
-shared_secret="$(grep password "$biboumi_config_file" | cut -d= -f2)"
-
+secret="$(grep password "$biboumi_config_file" | cut -d= -f2)"
 # Biboumi needs at least one admin JID.
 admin_jid="${admin}@biboumi.${domain}"
 
 # Create the biboumi config file.
-cp ../conf/biboumi.cfg /etc/biboumi/
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__PORT__" --replace_string="${port}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__ADMIN_JID__" --replace_string="${admin_jid}" --target_file="$biboumi_config_file"
-
-# Recalculate and store the checksum of the file for the next upgrade.
-ynh_store_file_checksum "$biboumi_config_file"
+ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
 
 #=================================================
 # UPGRADE METRONOME COMPONENT
@@ -89,8 +77,7 @@ ynh_store_file_checksum "$biboumi_config_file"
 
 # Upgrade metronome component
 cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # SETUP LOGROTATE

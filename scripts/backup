@@ -34,20 +34,20 @@ ynh_print_info --message="Declaring files to be backed up..."
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-ynh_backup "/etc/biboumi"
-ynh_backup "/var/lib/biboumi"
+ynh_backup --src_path="/etc/biboumi"
+ynh_backup --src_path="/var/lib/biboumi"
 
 #=================================================
 # BACKUP LOGROTATE
 #=================================================
 
-ynh_backup "/etc/logrotate.d/$app"
+ynh_backup --src_path="/etc/logrotate.d/$app"
 
 #=================================================
 # BACKUP METRONOME CONFIG
 #=================================================
 
-ynh_backup "/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/biboumi.cfg.lua"
 
 #=================================================
 # END OF SCRIPT
