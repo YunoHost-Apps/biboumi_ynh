@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -23,16 +23,9 @@ port=$(ynh_app_setting_get --app=$app --key=port)
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
-
-# Prevent conflict with other apps on the same domain
-ynh_app_setting_set --app=$app --key=no_sso --value=1
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
@@ -50,74 +43,69 @@ ynh_abort_if_errors
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
+
+# Prevent conflict with other apps on the same domain
+ynh_app_setting_set --app=$app --key=no_sso --value=1
+
+#=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=9
+ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# CONFIGURE BIBOUMI
+# UPDATE A CONFIG FILE
 #=================================================
+ynh_script_progression --message="Updating a configuration file..."
 
-biboumi_config_file="/etc/biboumi/biboumi.cfg"
+ynh_add_config --template="/etc/biboumi/biboumi.cfg" --destination="$biboumi_config_file"
 
-# Verify the checksum of a file, stored by `ynh_store_file_checksum` in the install script.
-ynh_backup_if_checksum_is_different "$biboumi_config_file"
-
-# Get shared_secret from the config file
-shared_secret="$(grep password "$biboumi_config_file" | cut -d= -f2)"
-
-# Biboumi needs at least one admin JID.
-admin_jid="${admin}@biboumi.${domain}"
-
-# Create the biboumi config file.
-cp ../conf/biboumi.cfg /etc/biboumi/
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__PORT__" --replace_string="${port}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__ADMIN_JID__" --replace_string="${admin_jid}" --target_file="$biboumi_config_file"
-
-# Recalculate and store the checksum of the file for the next upgrade.
-ynh_store_file_checksum "$biboumi_config_file"
+chown _biboumi /etc/biboumi
 
 #=================================================
 # UPGRADE METRONOME COMPONENT
 #=================================================
 
 # Upgrade metronome component
-cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/biboumi.cfg.lua"
 
+#=================================================
+# CREATE DIRECTORIES
+#=================================================
+
+mkdir -p /var/lib/biboumi
+
+# Set permissions to app files
+chown _biboumi /var/lib/biboumi
+
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
 ynh_script_progression --message="Upgrading logrotate configuration..." --weight=1
 
+chown _biboumi /var/log/biboumi
 # Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate /var/log/biboumi/ --non-append
+ynh_use_logrotate --non-append
 
 #=================================================
-# GENERIC FINALIZATION
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
 
-# Set permissions on app files
-chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
+yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# START SYSTEMD SERVICE
 #=================================================
-
-yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
-
-#=================================================
-# RELOAD SERVICES
-#=================================================
+ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --action=restart --service_name=metronome
 ynh_systemd_action --action=restart --service_name=biboumi
@@ -126,4 +114,4 @@ ynh_systemd_action --action=restart --service_name=biboumi
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of Biboumi completed" --last
+ynh_script_progression --message="Upgrade of $app completed"
