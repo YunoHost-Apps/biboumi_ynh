@@ -64,7 +64,7 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_add_config --template="/etc/biboumi/biboumi.cfg" --destination="$biboumi_config_file"
+ynh_add_config --template="/etc/biboumi/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
 
 chown _biboumi /etc/biboumi
 
