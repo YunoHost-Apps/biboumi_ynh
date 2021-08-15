@@ -70,29 +70,33 @@ ynh_script_progression --message="Adding a configuration file..."
 
 # Create a secret password that will be shared by metronome and biboumi.
 shared_secret="$(ynh_string_random 25)"
+ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
 
 # Biboumi needs at least one admin JID.
-admin_jid="${admin}@biboumi.${domain}"
+admin_jid="${admin}@$app.${domain}"
+ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
 
-ynh_add_config --template="../conf/biboumi/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
+ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
 
-chown _biboumi /etc/biboumi
+chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
 # CONFIGURE METRONOME
 #=================================================
 
 # Add metronome component
-ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
+
+chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
 
 #=================================================
 # CREATE DIRECTORIES
 #=================================================
 
-mkdir -p /var/lib/biboumi
+mkdir -p /var/lib/$app
 
 # Set permissions to app files
-chown _biboumi /var/lib/biboumi
+chown -R _biboumi:_biboumi "/var/lib/$app"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -101,17 +105,17 @@ chown _biboumi /var/lib/biboumi
 #=================================================
 ynh_script_progression --message="Configuring log rotation..." --weight=1
 
-mkdir -p /var/log/biboumi
-chown _biboumi /var/log/biboumi
+mkdir -p /var/log/$app
+chown -R _biboumi:_biboumi "/var/log/$app"
 # Use logrotate to manage application logfile(s)
-ynh_use_logrotate /var/log/biboumi/
+ynh_use_logrotate /var/log/$app/
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
+yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -119,7 +123,7 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --action=restart --service_name=metronome
-ynh_systemd_action --action=restart --service_name=biboumi
+ynh_systemd_action --action=restart --service_name=$app
 
 #=================================================
 # SETUP SSOWAT

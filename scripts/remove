@@ -52,9 +52,10 @@ ynh_remove_logrotate
 #=================================================
 ynh_script_progression --message="Removing various files..."
 
+ynh_secure_remove --file="/var/lib/$app"
+
 # Remove a directory securely
 ynh_secure_remove --file="/etc/$app"
-ynh_secure_remove --file="/var/lib/$app"
 
 # Remove the log files
 ynh_secure_remove --file="/var/log/$app"
@@ -63,10 +64,11 @@ ynh_secure_remove --file="/var/log/$app"
 # REMOVE METRONOME COMPONENT
 #=================================================
 
-ynh_secure_remove "/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_secure_remove --file="/etc/metronome/conf.d/$app.cfg.lua"
+ynh_systemd_action --action=restart --service_name=metronome
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Removal of Biboumi completed" --last
+ynh_script_progression --message="Removal of $app completed"

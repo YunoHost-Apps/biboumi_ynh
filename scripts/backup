@@ -41,12 +41,11 @@ ynh_backup --src_path="/etc/logrotate.d/$app"
 # BACKUP VARIOUS FILES
 #=================================================
 
-ynh_backup --src_path="/etc/biboumi"
+ynh_backup --src_path="/etc/$app"
 
-ynh_backup --src_path="/var/lib/biboumi"
+ynh_backup --src_path="/var/lib/$app"
 
-
-ynh_backup --src_path="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_backup --src_path="/etc/metronome/conf.d/$app.cfg.lua"
 
 #=================================================
 # END OF SCRIPT

@@ -19,6 +19,8 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 admin=$(ynh_app_setting_get --app=$app --key=admin)
 port=$(ynh_app_setting_get --app=$app --key=port)
+shared_secret=$(ynh_app_setting_get --app=$app --key=shared_secret)
+admin_jid=$(ynh_app_setting_get --app=$app --key=admin_jid)
 
 #=================================================
 # CHECK VERSION
@@ -30,6 +32,7 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -50,6 +53,16 @@ ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 # Prevent conflict with other apps on the same domain
 ynh_app_setting_set --app=$app --key=no_sso --value=1
 
+if [ -z "$shared_secret" ]; then
+	shared_secret="$(grep password "/etc/biboumi/biboumi.cfg" | cut -d= -f2)"
+	ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
+fi
+
+if [ -z "$admin_jid" ]; then
+	admin_jid="${admin}@$app.${domain}"
+	ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
+fi
+
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
@@ -64,25 +77,25 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_add_config --template="/etc/biboumi/biboumi.cfg" --destination="/etc/biboumi/biboumi.cfg"
+ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
 
-chown _biboumi /etc/biboumi
+chown _biboumi /etc/$app
 
 #=================================================
 # UPGRADE METRONOME COMPONENT
 #=================================================
 
 # Upgrade metronome component
-ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
 
 #=================================================
 # CREATE DIRECTORIES
 #=================================================
 
-mkdir -p /var/lib/biboumi
+mkdir -p /var/lib/$app
 
 # Set permissions to app files
-chown _biboumi /var/lib/biboumi
+chown _biboumi /var/lib/$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -91,7 +104,7 @@ chown _biboumi /var/lib/biboumi
 #=================================================
 ynh_script_progression --message="Upgrading logrotate configuration..." --weight=1
 
-chown _biboumi /var/log/biboumi
+chown _biboumi /var/log/$app
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
 
@@ -100,7 +113,7 @@ ynh_use_logrotate --non-append
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
+yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -108,7 +121,7 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --action=restart --service_name=metronome
-ynh_systemd_action --action=restart --service_name=biboumi
+ynh_systemd_action --action=restart --service_name=$app
 
 #=================================================
 # END OF SCRIPT
