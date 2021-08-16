@@ -30,14 +30,6 @@ then
 fi
 
 #=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Removing dependencies..."
-
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
-
-#=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
 ynh_script_progression --message="Removing logrotate configuration..."
@@ -46,12 +38,21 @@ ynh_script_progression --message="Removing logrotate configuration..."
 ynh_remove_logrotate
 
 #=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Removing dependencies..."
+
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
+
+#=================================================
 # SPECIFIC REMOVE
 #=================================================
 # REMOVE VARIOUS FILES
 #=================================================
 ynh_script_progression --message="Removing various files..."
 
+# Remove data directory
 ynh_secure_remove --file="/var/lib/$app"
 
 # Remove a directory securely
@@ -60,10 +61,7 @@ ynh_secure_remove --file="/etc/$app"
 # Remove the log files
 ynh_secure_remove --file="/var/log/$app"
 
-#=================================================
-# REMOVE METRONOME COMPONENT
-#=================================================
-
+# Remove Metronome component
 ynh_secure_remove --file="/etc/metronome/conf.d/$app.cfg.lua"
 ynh_systemd_action --action=restart --service_name=metronome
 

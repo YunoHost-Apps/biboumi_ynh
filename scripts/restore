@@ -51,7 +51,7 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Restoring various files..."
 
-ynh_restore_file--origin_path= "/etc/$app"
+ynh_restore_file --origin_path="/etc/$app"
 chown -R _biboumi:_biboumi /etc/$app
 
 ynh_restore_file --origin_path="/var/lib/$app"
@@ -59,6 +59,17 @@ chown -R _biboumi:_biboumi /var/lib/$app
 
 ynh_restore_file --origin_path="/etc/metronome/conf.d/$app.cfg.lua"
 chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+ynh_systemd_action --service_name=metronome --action="restart"
+
+#=================================================
+# RESTORE THE LOGROTATE CONFIGURATION
+#=================================================
+ynh_script_progression --message="Restoring the logrotate configuration..."
+
+mkdir -p /var/log/$app
+chown -R _biboumi:_biboumi "/var/log/$app"
+
+ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
@@ -72,17 +83,7 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --action=restart --service_name=metronome
-ynh_systemd_action --action=restart --service_name=$app
-
-#=================================================
-# RESTORE THE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the logrotate configuration..."
-
-mkdir -p /var/log/$app
-ynh_restore_file --origin_path="/etc/logrotate.d/$app"
-chown -R _biboumi:_biboumi /var/log/$app
+ynh_systemd_action --service_name=$app --action="restart"
 
 #=================================================
 # END OF SCRIPT

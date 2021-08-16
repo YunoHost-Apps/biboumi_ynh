@@ -48,7 +48,7 @@ ynh_abort_if_errors
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
+ynh_script_progression --message="Ensuring downward compatibility..."
 
 # Prevent conflict with other apps on the same domain
 ynh_app_setting_set --app=$app --key=no_sso --value=1
@@ -73,38 +73,46 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
+# UPGRADE METRONOME COMPONENT
+#=================================================
+ynh_script_progression --message="Upgrading Metronome component..."
+
+# Upgrade metronome component
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
+
+chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+
+ynh_systemd_action --service_name=metronome --action="restart"
+
+#=================================================
+# CREATE DIRECTORIES
+#=================================================
+ynh_script_progression --message="Creating a data directory..."
+
+mkdir -p /var/lib/$app
+
+# Set permissions to app files
+chown -R _biboumi:_biboumi "/var/lib/$app"
+
+#=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
 ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
 
-chown _biboumi /etc/$app
-
-#=================================================
-# UPGRADE METRONOME COMPONENT
-#=================================================
-
-# Upgrade metronome component
-ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
-
-#=================================================
-# CREATE DIRECTORIES
-#=================================================
-
-mkdir -p /var/lib/$app
-
-# Set permissions to app files
-chown _biboumi /var/lib/$app
+chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..." --weight=1
+ynh_script_progression --message="Upgrading logrotate configuration..."
 
-chown _biboumi /var/log/$app
+mkdir -p /var/log/$app
+chown -R _biboumi:_biboumi "/var/log/$app"
+
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
 
@@ -120,7 +128,6 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --action=restart --service_name=metronome
 ynh_systemd_action --action=restart --service_name=$app
 
 #=================================================
