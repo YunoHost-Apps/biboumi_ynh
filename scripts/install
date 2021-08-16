@@ -23,6 +23,9 @@ ynh_abort_if_errors
 domain=$YNH_APP_ARG_DOMAIN
 admin=$YNH_APP_ARG_ADMIN
 
+shared_secret="$(ynh_string_random 25)"
+admin_jid="${admin}@$app.${domain}"
+
 app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
@@ -42,6 +45,8 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=admin --value=$admin
+ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
+ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -89,14 +94,6 @@ chown -R _biboumi:_biboumi "/var/lib/$app"
 # ADD A CONFIGURATION
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
-
-# Create a secret password that will be shared by metronome and biboumi.
-shared_secret="$(ynh_string_random 25)"
-ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
-
-# Biboumi needs at least one admin JID.
-admin_jid="${admin}@$app.${domain}"
-ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
 
 ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
 
