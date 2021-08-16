@@ -23,10 +23,10 @@ ynh_abort_if_errors
 domain=$YNH_APP_ARG_DOMAIN
 admin=$YNH_APP_ARG_ADMIN
 
+app=$YNH_APP_INSTANCE_NAME
+
 shared_secret="$(ynh_string_random 25)"
 admin_jid="${admin}@$app.${domain}"
-
-app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
