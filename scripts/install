@@ -25,9 +25,13 @@ admin=$YNH_APP_ARG_ADMIN
 
 app=$YNH_APP_INSTANCE_NAME
 
+shared_secret="$(ynh_string_random 25)"
+admin_jid="${admin}@$app.${domain}"
+
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
+ynh_script_progression --message="Validating installation parameters..."
 
 if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
 then
@@ -37,101 +41,103 @@ fi
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
+ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=admin --value=$admin
+ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
+ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Finding an available port..." --weight=2
+ynh_script_progression --message="Finding an available port..."
 
-# Find a free port
+# Find an available port
 port=$(ynh_find_port --port=113)
 ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=9
+ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# CONFIGURE BIBOUMI
-#=================================================
-
-# Create a secret password that will be shared by metronome and biboumi.
-shared_secret="$(ynh_string_random 25)"
-
-# Biboumi needs at least one admin JID.
-admin_jid="${admin}@biboumi.${domain}"
-
-biboumi_config_file="/etc/biboumi/biboumi.cfg"
-
-# Create the biboumi config file.
-cp ../conf/biboumi.cfg "$biboumi_config_file"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__PORT__" --replace_string="${port}" --target_file="$biboumi_config_file"
-ynh_replace_string --match_string="__ADMIN_JID__" --replace_string="${admin_jid}" --target_file="$biboumi_config_file"
-
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$biboumi_config_file"
-
-#=================================================
 # CONFIGURE METRONOME
 #=================================================
+ynh_script_progression --message="Configuring Metronome..."
 
 # Add metronome component
-cp ../conf/biboumi.cfg.lua /etc/metronome/conf.d/
-ynh_replace_string  --match_string="__DOMAIN__" --replace_string="${domain}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
-ynh_replace_string  --match_string="__SECRET__" --replace_string="${shared_secret}" --target_file="/etc/metronome/conf.d/biboumi.cfg.lua"
+ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
+
+chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+
+ynh_systemd_action --service_name=metronome --action="restart"
 
 #=================================================
-# CREATE DIRECTORIES
+# CREATE DATA DIRECTORY
 #=================================================
+ynh_script_progression --message="Creating a data directory..."
 
-mkdir -p /var/log/biboumi /var/lib/biboumi
+mkdir -p /var/lib/$app
 
 # Set permissions to app files
-chown _biboumi /var/log/biboumi /var/lib/biboumi /etc/biboumi
+chown -R _biboumi:_biboumi "/var/lib/$app"
 
+#=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..."
+
+ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
+
+chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
+
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Configuring log rotation..." --weight=1
+ynh_script_progression --message="Configuring log rotation..."
+
+mkdir -p /var/log/$app
+chown -R _biboumi:_biboumi "/var/log/$app"
 
 # Use logrotate to manage application logfile(s)
-ynh_use_logrotate /var/log/biboumi/
+ynh_use_logrotate
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add biboumi --description="XMPP gateway for the IRC network" --log="/var/log/biboumi/biboumi.log"
+yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 #=================================================
-# SET THE APP AS NOT USING THE SSO
+# START SYSTEMD SERVICE
 #=================================================
+ynh_script_progression --message="Starting a systemd service..."
+
+# Start a systemd service
+sleep 5
+ynh_systemd_action --service_name=$app --action="restart"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Configuring permissions..."
 
 # Prevent conflict with other apps on the same domain
 ynh_app_setting_set --app=$app --key=no_sso --value=1
 
 #=================================================
-# RELOAD SERVICES
-#=================================================
-
-ynh_systemd_action --action=restart --service_name=metronome
-ynh_systemd_action --action=restart --service_name=biboumi
-
-#=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of Biboumi completed" --last
+ynh_script_progression --message="Installation of $app completed"
