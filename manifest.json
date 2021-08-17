@@ -8,6 +8,12 @@
     },
     "version": "8.3~ynh1",
     "url": "https://biboumi.louiz.org/",
+    "upstream": {
+        "license": "Zlib",
+        "website": "https://biboumi.louiz.org/",
+        "admindoc": "Official documentation: https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst",
+        "code": "https://lab.louiz.org/louiz/biboumi"
+    },
     "license": "Zlib",
     "maintainer": {
         "name": "pitchum",

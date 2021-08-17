@@ -10,6 +10,8 @@
 		setup_private=0
 		setup_public=0
 		upgrade=1
+		# 8.3~ynh1
+		upgrade=1	from_commit=6596c7e12e17a2b9149b20739e916184e71fdfbd
 		backup_restore=1
 		multi_instance=0
 		port_already_use=1 (113)
@@ -17,3 +19,6 @@
 ;;; Options
 Email=pitchum@gramaton.org
 Notification=none
+;;; Upgrade options
+	; commit=6596c7e12e17a2b9149b20739e916184e71fdfbd
+		name=8.3~ynh1.
