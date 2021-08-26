@@ -13,6 +13,9 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
+ynh_clean_setup () {
+	ynh_clean_check_starting
+}
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
@@ -65,6 +68,7 @@ ynh_app_setting_set --app=$app --key=port --value=$port
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_systemd_action --service_name=$app --action="stop" --log_path="systemd"
 
 #=================================================
 # SPECIFIC SETUP
@@ -100,6 +104,14 @@ ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cf
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring a systemd service..."
+
+# Create a dedicated systemd config
+systemctl enable $app.service --quiet
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
@@ -125,8 +137,7 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
-sleep 5
-ynh_systemd_action --service_name=$app --action="restart"
+ynh_systemd_action --service_name=$app --action="start" --line_match="Started Biboumi" --log_path="systemd"
 
 #=================================================
 # SETUP SSOWAT

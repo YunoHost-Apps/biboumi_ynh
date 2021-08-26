@@ -37,6 +37,7 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
+	ynh_clean_check_starting
 	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -45,6 +46,13 @@ ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=$app --action="stop" --line_match="Stopped Biboumi" --log_path="systemd"
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -69,6 +77,7 @@ fi
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_systemd_action --service_name=$app --action="stop" --log_path="systemd"
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -104,6 +113,14 @@ ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cf
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Upgrading systemd configuration..."
+
+# Create a dedicated systemd config
+systemctl enable $app.service --quiet
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
@@ -128,7 +145,7 @@ yunohost service add $app --description="XMPP gateway for the IRC network" --log
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --action=restart --service_name=$app
+ynh_systemd_action --service_name=$app --action="start" --line_match="Started Biboumi" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT
