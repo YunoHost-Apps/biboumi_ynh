@@ -37,7 +37,7 @@ For example, if you have a YunoHost server hosting domain *example.net* and you 
 ## Documentation and resources
 
 * Official app website: https://biboumi.louiz.org/
-* Official admin documentation: Official documentation: https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst
+* Official admin documentation: https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst
 * Upstream app code repository: https://lab.louiz.org/louiz/biboumi
 * YunoHost documentation for this app: https://yunohost.org/app_biboumi
 * Report a bug: https://github.com/YunoHost-Apps/biboumi_ynh/issues
