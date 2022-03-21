@@ -11,7 +11,7 @@
     "upstream": {
         "license": "Zlib",
         "website": "https://biboumi.louiz.org/",
-        "admindoc": "Official documentation: https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst",
+        "admindoc": "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst",
         "code": "https://lab.louiz.org/louiz/biboumi"
     },
     "license": "Zlib",
@@ -30,13 +30,11 @@
         "install" : [
             {
                 "name": "domain",
-                "type": "domain",
-                "example": "example.com"
+                "type": "domain"
             },
             {
                 "name": "admin",
-                "type": "user",
-                "example": "johndoe"
+                "type": "user"
             }
         ]
     }

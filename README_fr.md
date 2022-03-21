@@ -33,7 +33,7 @@ For example, if you have a YunoHost server hosting domain *example.net* and you 
 ## Documentations et ressources
 
 * Site officiel de l'app : https://biboumi.louiz.org/
-* Documentation officielle de l'admin : Official documentation: https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst
+* Documentation officielle de l'admin : https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst
 * Dépôt de code officiel de l'app : https://lab.louiz.org/louiz/biboumi
 * Documentation YunoHost pour cette app : https://yunohost.org/app_biboumi
 * Signaler un bug : https://github.com/YunoHost-Apps/biboumi_ynh/issues
