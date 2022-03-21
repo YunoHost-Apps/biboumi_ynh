@@ -99,6 +99,8 @@ chown -R _biboumi:_biboumi "/var/lib/$app"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
+mkdir -p "/etc/$app/"
+
 ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
 
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
