@@ -3,8 +3,8 @@
     "id": "biboumi",
     "packaging_format": 1,
     "description": {
-        "en": "XMPP gateway for the IRC network.",
-        "fr": "Passerelle XMPP pour le réseau IRC."
+        "en": "XMPP gateway for the IRC network",
+        "fr": "Passerelle XMPP pour le réseau IRC"
     },
     "version": "8.3~ynh1",
     "url": "https://biboumi.louiz.org/",
@@ -20,7 +20,7 @@
         "email": "pitchum@yunohost.org"
     },
     "requirements": {
-        "yunohost": ">= 4.1.7"
+        "yunohost": ">= 11.0.9"
     },
     "multi_instance": false,
     "services": [
