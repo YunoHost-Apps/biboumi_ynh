@@ -20,7 +20,7 @@
         "email": "pitchum@yunohost.org"
     },
     "requirements": {
-        "yunohost": ">= 11.0.3"
+        "yunohost": ">= 11.0.9"
     },
     "multi_instance": false,
     "services": [
