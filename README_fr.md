@@ -18,7 +18,7 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 
 Passerelle XMPP pour le réseau IRC
 
-**Version incluse :** 8.3~ynh1
+**Version incluse :** 8.3~ynh2
 ## Avertissements / informations importantes
 
 Once biboumi_ynh is installed you can use any XMPP client software to join IRC channels. Any IRC channel is seen as a standard XMPP chatroom (aka MUC) with a special name.  
