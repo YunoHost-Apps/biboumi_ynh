@@ -5,7 +5,7 @@
 #=================================================
 
 # dependencies used by the app
-pkg_dependencies="biboumi"
+pkg_dependencies="metronome biboumi"
 
 #=================================================
 # PERSONAL HELPERS
