@@ -7,6 +7,7 @@ It shall NOT be edited by hand.
 
 [![Niveau d’intégration](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
 
+
 [![Installer Biboumi avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 
 *[Read this readme in english.](./README.md)*
