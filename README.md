@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # Biboumi for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![Working status](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![Working status](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
+
 [![Install Biboumi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -17,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 XMPP gateway for the IRC network
 
-**Shipped version:** 8.3~ynh1
+**Shipped version:** 8.3~ynh2
 ## Disclaimers / important information
 
 Once biboumi_ynh is installed you can use any XMPP client software to join IRC channels. Any IRC channel is seen as a standard XMPP chatroom (aka MUC) with a special name.  
