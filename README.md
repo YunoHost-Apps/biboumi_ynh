@@ -18,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 XMPP gateway for the IRC network
 
-**Shipped version:** 8.3~ynh1
+**Shipped version:** 8.3~ynh2
 ## Disclaimers / important information
 
 Once biboumi_ynh is installed you can use any XMPP client software to join IRC channels. Any IRC channel is seen as a standard XMPP chatroom (aka MUC) with a special name.  
