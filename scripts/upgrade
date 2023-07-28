@@ -10,39 +10,10 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-port=$(ynh_app_setting_get --app=$app --key=port)
-shared_secret=$(ynh_app_setting_get --app=$app --key=shared_secret)
-admin_jid=$(ynh_app_setting_get --app=$app --key=admin_jid)
-
-#=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	ynh_clean_check_starting
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -52,32 +23,6 @@ ynh_abort_if_errors
 ynh_script_progression --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="stop" --line_match="Stopped Biboumi" --log_path="systemd"
-
-#=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
-
-# Prevent conflict with other apps on the same domain
-ynh_app_setting_set --app=$app --key=no_sso --value=1
-
-if [ -z "$shared_secret" ]; then
-	shared_secret="$(grep password "/etc/biboumi/biboumi.cfg" | cut -d= -f2)"
-	ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
-fi
-
-if [ -z "$admin_jid" ]; then
-	admin_jid="${admin}@$app.${domain}"
-	ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
-fi
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..."
-
-ynh_install_app_dependencies $pkg_dependencies
-ynh_systemd_action --service_name=$app --action="stop" --log_path="systemd"
 
 #=================================================
 # SPECIFIC UPGRADE
