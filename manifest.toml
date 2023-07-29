@@ -1,0 +1,48 @@
+packaging_format = 2
+
+id = "biboumi"
+name = "Biboumi"
+description.en = "XMPP gateway for the IRC network"
+description.fr = "Passerelle XMPP pour le réseau IRC"
+
+version = "8.3~ynh2"
+
+maintainers = ["pitchum"]
+
+[upstream]
+license = "Zlib"
+website = "https://biboumi.louiz.org/"
+admindoc = "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst"
+code = "https://lab.louiz.org/louiz/biboumi"
+
+[integration]
+yunohost = ">= 11.1.21"
+architectures = "all"
+multi_instance = false
+ldap = false
+sso = false
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+    full_domain = true
+
+    [install.admin]
+    type = "user"
+
+[resources]
+
+    [resources.ports]
+    main.default = 113
+
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.permissions]
+
+    [resources.apt]
+    packages = "metronome biboumi"

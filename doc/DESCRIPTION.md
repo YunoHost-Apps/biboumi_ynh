@@ -1,0 +1,1 @@
+XMPP gateway for the IRC network
