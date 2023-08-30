@@ -16,7 +16,7 @@ admindoc = "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst"
 code = "https://lab.louiz.org/louiz/biboumi"
 
 [integration]
-yunohost = ">= 11.1.21"
+yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = false
 ldap = false
@@ -28,7 +28,6 @@ ram.runtime = "50M"
 [install]
     [install.domain]
     type = "domain"
-    full_domain = true
 
     [install.admin]
     type = "user"
