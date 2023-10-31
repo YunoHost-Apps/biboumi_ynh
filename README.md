@@ -24,7 +24,7 @@ XMPP gateway for the IRC network
 * Official app website: <https://biboumi.louiz.org/>
 * Official admin documentation: <https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst>
 * Upstream app code repository: <https://lab.louiz.org/louiz/biboumi>
-* YunoHost documentation for this app: <https://yunohost.org/app_biboumi>
+* YunoHost Store: <https://apps.yunohost.org/app/biboumi>
 * Report a bug: <https://github.com/YunoHost-Apps/biboumi_ynh/issues>
 
 ## Developer info
