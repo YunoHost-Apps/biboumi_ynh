@@ -18,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 XMPP gateway for the IRC network
 
-**Shipped version:** 8.3~ynh2
+**Shipped version:** 8.3~ynh3
 ## Documentation and resources
 
 * Official app website: <https://biboumi.louiz.org/>

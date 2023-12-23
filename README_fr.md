@@ -18,7 +18,7 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 
 XMPP gateway for the IRC network
 
-**Version incluse :** 8.3~ynh2
+**Version incluse :** 8.3~ynh3
 ## Documentations et ressources
 
 * Site officiel de l’app : <https://biboumi.louiz.org/>
