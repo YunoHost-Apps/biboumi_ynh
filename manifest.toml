@@ -5,7 +5,7 @@ name = "Biboumi"
 description.en = "XMPP gateway for the IRC network"
 description.fr = "Passerelle XMPP pour le réseau IRC"
 
-version = "8.3~ynh2"
+version = "8.3~ynh3"
 
 maintainers = ["pitchum"]
 
@@ -16,19 +16,22 @@ admindoc = "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst"
 code = "https://lab.louiz.org/louiz/biboumi"
 
 [integration]
-yunohost = ">= 11.1.21"
+yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = false
+
 ldap = false
+
 sso = false
+
 disk = "50M"
 ram.build = "50M"
 ram.runtime = "50M"
 
 [install]
+
     [install.domain]
     type = "domain"
-    full_domain = true
 
     [install.admin]
     type = "user"
@@ -45,4 +48,4 @@ ram.runtime = "50M"
     [resources.permissions]
 
     [resources.apt]
-    packages = "metronome biboumi"
+    packages = "metronome, biboumi"
