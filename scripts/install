@@ -42,8 +42,9 @@ ynh_script_progression --message="Adding $app's configuration files..." --weight
 ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
 
 # Add metronome component
-ynh_add_config --template="metronome.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
-chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+metronome_config_dir=$(_get_metronome_config_dir)
+ynh_add_config --template="metronome.cfg.lua" --destination="$metronome_config_dir/$app.cfg.lua"
+chown metronome:metronome "$metronome_config_dir/$app.cfg.lua"
 ynh_systemd_action --service_name="metronome" --action="restart"
 
 # Add biboumi configuration

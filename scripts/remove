@@ -36,7 +36,7 @@ ynh_secure_remove --file="/var/lib/$app"
 ynh_secure_remove --file="/etc/$app"
 
 # Remove Metronome component
-ynh_secure_remove --file="/etc/metronome/conf.d/$app.cfg.lua"
+ynh_secure_remove --file="$(_get_metronome_config_dir)/$app.cfg.lua"
 ynh_systemd_action --action=restart --service_name=metronome
 
 #=================================================
