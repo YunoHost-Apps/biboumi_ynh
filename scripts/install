@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,114 +8,69 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-
-shared_secret="$(ynh_string_random 25)"
-admin_jid="${admin}@$app.${domain}"
-
-#=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-#REMOVEME? ynh_script_progression --message="Validating installation parameters..."
 
-if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
-then
+if dpkg --compare-versions "$(uname -r)" "<=" "4.0"; then
     ynh_die "Upgrade your kernel first. Unsupported version: $(uname -r)"
 fi
 
 #=================================================
-# STORE SETTINGS FROM MANIFEST
-#=================================================
-ynh_script_progression --message="Storing installation settings..."
-
-ynh_app_setting_set --app=$app --key=shared_secret --value=$shared_secret
-ynh_app_setting_set --app=$app --key=admin_jid --value=$admin_jid
-
-#=================================================
-# INSTALL DEPENDENCIES
+# INITIALIZE AND STORE SETTINGS
 #=================================================
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="systemd"
+shared_secret="$(ynh_string_random 25)"
+ynh_app_setting_set --app="$app" --key="shared_secret" --value="$shared_secret"
 
-#=================================================
-# SPECIFIC SETUP
-#=================================================
-# CONFIGURE METRONOME
-#=================================================
-ynh_script_progression --message="Configuring Metronome..."
-
-# Add metronome component
-ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
-
-chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
-
-ynh_systemd_action --service_name=metronome --action="restart"
+admin_jid="${admin}@${app}.${domain}"
+ynh_app_setting_set --app="$app" --key="admin_jid" --value="$admin_jid"
 
 #=================================================
 # CREATE DATA DIRECTORY
 #=================================================
-ynh_script_progression --message="Creating a data directory..."
-
-mkdir -p /var/lib/$app
+ynh_script_progression --message="Setting up the data directory..."
 
 # Set permissions to app files
 chown -R _biboumi:_biboumi "/var/lib/$app"
 
 #=================================================
-# ADD A CONFIGURATION
+# APP INITIAL CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding a configuration file..."
+ynh_script_progression --message="Adding $app's configuration files..." --weight=1
 
+# Stop the service started by apt install
+ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
+
+# Add metronome component
+ynh_add_config --template="metronome.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
+chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+ynh_systemd_action --service_name="metronome" --action="restart"
+
+# Add biboumi configuration
 mkdir -p "/etc/$app/"
-
-ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
-
+ynh_add_config --template="biboumi.cfg" --destination="/etc/$app/$app.cfg"
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
-# SETUP SYSTEMD
+# SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..."
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
 # Create a dedicated systemd config
-systemctl enable $app.service --quiet
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring log rotation..."
-
-mkdir -p /var/log/$app
-chown -R _biboumi:_biboumi "/var/log/$app"
+systemctl enable "$app.service" --quiet
+yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
-
-yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
+chown -R _biboumi:_biboumi "/var/log/$app"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting $app's systemd service..." --weight=1
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app --action="start" --line_match="Started Biboumi" --log_path="systemd"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Configuring permissions..."
-
-# Prevent conflict with other apps on the same domain
-ynh_app_setting_set --app=$app --key=no_sso --value=1
+ynh_systemd_action --service_name="$app" --action="start" --line_match="Started Biboumi" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT
