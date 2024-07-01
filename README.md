@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Biboumi for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![Working status](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/biboumi.svg)](https://ci-apps.yunohost.org/ci/apps/biboumi/) ![Working status](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
 
 [![Install Biboumi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 

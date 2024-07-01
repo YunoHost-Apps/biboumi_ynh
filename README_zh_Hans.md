@@ -5,7 +5,7 @@
 
 # YunoHost 上的 Biboumi
 
-[![集成程度](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![工作状态](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
+[![集成程度](https://dash.yunohost.org/integration/biboumi.svg)](https://ci-apps.yunohost.org/ci/apps/biboumi/) ![工作状态](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
 
 [![使用 YunoHost 安装 Biboumi](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 

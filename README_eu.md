@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Biboumi YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/biboumi.svg)](https://dash.yunohost.org/appci/app/biboumi) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/biboumi.svg)](https://ci-apps.yunohost.org/ci/apps/biboumi/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/biboumi.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/biboumi.maintain.svg)
 
 [![Instalatu Biboumi YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=biboumi)
 
