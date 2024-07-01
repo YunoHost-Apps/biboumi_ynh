@@ -22,9 +22,9 @@ XMPP gateway for the IRC network. Needs Metronome.
 **Version incluse :** 8.3~ynh3
 ## Documentations et ressources
 
-- Site officiel de l’app : <https://biboumi.louiz.org/>
-- Documentation officielle de l’admin : <https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst>
-- Dépôt de code officiel de l’app : <https://lab.louiz.org/louiz/biboumi>
+- Site officiel de l’app : <https://biboumi.louiz.org>
+- Documentation officielle de l’admin : <https://doc.biboumi.louiz.org>
+- Dépôt de code officiel de l’app : <https://github.com/louiz/biboumi>
 - YunoHost Store : <https://apps.yunohost.org/app/biboumi>
 - Signaler un bug : <https://github.com/YunoHost-Apps/biboumi_ynh/issues>
 
