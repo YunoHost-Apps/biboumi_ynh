@@ -46,6 +46,8 @@ systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
+
+ynh_restore_file --origin_path="/var/log/$app/"
 chown -R _biboumi:_biboumi "/var/log/$app"
 
 #=================================================
