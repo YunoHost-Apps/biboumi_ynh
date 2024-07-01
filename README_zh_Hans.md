@@ -16,7 +16,8 @@
 
 ## 概况
 
-XMPP gateway for the IRC network
+XMPP gateway for the IRC network. Needs Metronome.
+
 
 **分发版本：** 8.3~ynh3
 ## 文档与资源

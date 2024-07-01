@@ -16,7 +16,8 @@ It shall NOT be edited by hand.
 
 ## Overview
 
-XMPP gateway for the IRC network
+XMPP gateway for the IRC network. Needs Metronome.
+
 
 **Shipped version:** 8.3~ynh3
 ## Documentation and resources
