@@ -13,9 +13,9 @@ maintainers = ["pitchum"]
 
 [upstream]
 license = "Zlib"
-website = "https://biboumi.louiz.org/"
-admindoc = "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst"
-code = "https://lab.louiz.org/louiz/biboumi"
+website = "https://biboumi.louiz.org"
+admindoc = "https://doc.biboumi.louiz.org"
+code = "https://github.com/louiz/biboumi"
 
 [integration]
 yunohost = ">= 11.2"
