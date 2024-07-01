@@ -21,7 +21,7 @@ _get_metronome_config_dir() {
         return 1
     fi
 
-    echo "$(yunohost app setting "$metronome_app" install_dir)/conf/conf.d"
+    echo "$(ynh_app_setting_get --app="$metronome_app" --key="install_dir")/conf/conf.d"
 }
 
 #=================================================
