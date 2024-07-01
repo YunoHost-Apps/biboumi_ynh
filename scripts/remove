@@ -53,7 +53,6 @@ ynh_secure_remove --file="/var/lib/$app"
 ynh_secure_remove --file="/etc/$app"
 
 # Remove the log files
-ynh_secure_remove --file="/var/log/$app"
 
 # Remove Metronome component
 ynh_secure_remove --file="/etc/metronome/conf.d/$app.cfg.lua"
