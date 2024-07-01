@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 
-ynh_systemd_action --service_name="$app" --action="stop" --line_match="Stopped Biboumi" --log_path="systemd"
+ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
 
 #=================================================
 # CREATE DIRECTORIES

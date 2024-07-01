@@ -18,7 +18,7 @@ if ynh_exec_warn_less yunohost service status "$app" >/dev/null; then
 fi
 
 # Remove the dedicated systemd config
-ynh_systemd_action --service_name="$app" --action="stop" --line_match="Stopped Biboumi" --log_path="systemd"
+ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
 systemctl disable "$app.service" --quiet
 
 # Remove the app-specific logrotate config
