@@ -15,7 +15,7 @@ _get_metronome_config_dir() {
     fi
 
     # multi_instance=false, there's only one
-    metronome_app=$(yunohost app list --json | jq --raw '.apps[] | select(.id == "metronome") | .id')
+    metronome_app=$(yunohost app list --json | jq -r '.apps[] | select(.id == "metronome") | .id')
     if (( ${#metronome_apps[@]} == 0 )); then
         ynh_print_warn --message="Could not find any metronome app!"
         return 1
