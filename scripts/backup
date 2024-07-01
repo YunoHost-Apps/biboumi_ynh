@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -29,7 +27,9 @@ ynh_backup --src_path="/etc/$app"
 
 ynh_backup --src_path="/var/lib/$app"
 
-ynh_backup --src_path="/etc/metronome/conf.d/$app.cfg.lua"
+ynh_backup --src_path="$(_get_metronome_config_dir)/$app.cfg.lua"
+
+ynh_backup --src_path="/var/log/$app/"
 
 #=================================================
 # END OF SCRIPT

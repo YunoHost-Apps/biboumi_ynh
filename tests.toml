@@ -1,3 +1,11 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/tests.v1.schema.json
+
 test_format = 1.0
 
 [default]
+
+    preinstall = """
+    if cat /etc/os-release | grep --quiet bookworm 2>/dev/null; then
+        yunohost app install --force https://github.com/yunoHost-Apps/metronome_ynh/tree/testing -a 'domain=domain.tld&init_main_permission=visitors'
+    fi
+    """

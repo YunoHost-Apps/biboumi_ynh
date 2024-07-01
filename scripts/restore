@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -15,10 +13,17 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Validating restoration parameters..."
 
-if dpkg --compare-versions "$(uname -r)" "<=" "4.0"
-then
+if dpkg --compare-versions "$(uname -r)" "<=" "4.0"; then
     ynh_die "Upgrade your kernel first. Unsupported version: $(uname -r)"
 fi
+
+#=================================================
+# RESTORE THE DATA DIRECTORY
+#=================================================
+ynh_script_progression --message="Restoring the data directory..." --weight=1
+
+ynh_restore_file --origin_path="/var/lib/$app"
+chown -R _biboumi:_biboumi "/var/lib/$app"
 
 #=================================================
 # RESTORE VARIOUS FILES
@@ -26,45 +31,32 @@ fi
 ynh_script_progression --message="Restoring various files..."
 
 ynh_restore_file --origin_path="/etc/$app"
-chown -R _biboumi:_biboumi /etc/$app
+chown -R _biboumi:_biboumi "/etc/$app"
 
-ynh_restore_file --origin_path="/var/lib/$app"
-chown -R _biboumi:_biboumi /var/lib/$app
-
-ynh_restore_file --origin_path="/etc/metronome/conf.d/$app.cfg.lua"
-chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
+metronome_config_dir=$(_get_metronome_config_dir)
+ynh_restore_file --origin_path="$metronome_config_dir/$app.cfg.lua"
+chown metronome:metronome "$metronome_config_dir/$app.cfg.lua"
 ynh_systemd_action --service_name=metronome --action="restart"
 
 #=================================================
-# RESTORE SYSTEMD
+# RESTORE SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Restoring the systemd configuration..."
+ynh_script_progression --message="Restoring system configurations related to $app..." --weight=1
 
-systemctl enable $app.service --quiet
-
-#=================================================
-# RESTORE THE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the logrotate configuration..."
-
-mkdir -p /var/log/$app
-chown -R _biboumi:_biboumi "/var/log/$app"
+systemctl enable "$app.service" --quiet
+yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
-
-yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
+ynh_restore_file --origin_path="/var/log/$app/"
+chown -R _biboumi:_biboumi "/var/log/$app"
 
 #=================================================
-# START SYSTEMD SERVICE
+# RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Reloading NGINX web server and $app's service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="start" --line_match="Started Biboumi" --log_path="systemd"
+ynh_systemd_action --service_name="$app" --action="start" --line_match="Authenticated with the XMPP server" --log_path="/var/log/$app/$app.log"
 
 #=================================================
 # END OF SCRIPT

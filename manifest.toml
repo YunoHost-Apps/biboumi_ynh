@@ -1,3 +1,5 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
 packaging_format = 2
 
 id = "biboumi"
@@ -11,9 +13,9 @@ maintainers = ["pitchum"]
 
 [upstream]
 license = "Zlib"
-website = "https://biboumi.louiz.org/"
-admindoc = "https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst"
-code = "https://lab.louiz.org/louiz/biboumi"
+website = "https://biboumi.louiz.org"
+admindoc = "https://doc.biboumi.louiz.org"
+code = "https://github.com/louiz/biboumi"
 
 [integration]
 yunohost = ">= 11.2"
@@ -45,7 +47,16 @@ ram.runtime = "50M"
 
     [resources.install_dir]
 
+    [resources.data_dir]
+    dir = "/var/lib/__APP__"
+
     [resources.permissions]
 
     [resources.apt]
-    packages = "metronome, biboumi"
+    packages = [ "biboumi", ]
+
+    packages_from_raw_bash = """
+        if [[ $YNH_DEBIAN_VERSION == "bullseye" ]]; then
+            echo "metronome";
+        fi
+    """

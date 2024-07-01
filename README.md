@@ -16,14 +16,15 @@ It shall NOT be edited by hand.
 
 ## Overview
 
-XMPP gateway for the IRC network
+XMPP gateway for the IRC network. Needs Metronome.
+
 
 **Shipped version:** 8.3~ynh3
 ## Documentation and resources
 
-- Official app website: <https://biboumi.louiz.org/>
-- Official admin documentation: <https://lab.louiz.org/louiz/biboumi/blob/8.3/doc/biboumi.1.rst>
-- Upstream app code repository: <https://lab.louiz.org/louiz/biboumi>
+- Official app website: <https://biboumi.louiz.org>
+- Official admin documentation: <https://doc.biboumi.louiz.org>
+- Upstream app code repository: <https://github.com/louiz/biboumi>
 - YunoHost Store: <https://apps.yunohost.org/app/biboumi>
 - Report a bug: <https://github.com/YunoHost-Apps/biboumi_ynh/issues>
 

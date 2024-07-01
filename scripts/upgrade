@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,40 +8,16 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="stop" --line_match="Stopped Biboumi" --log_path="systemd"
-
-#=================================================
-# SPECIFIC UPGRADE
-#=================================================
-# UPGRADE METRONOME COMPONENT
-#=================================================
-ynh_script_progression --message="Upgrading Metronome component..."
-
-# Upgrade metronome component
-ynh_add_config --template="../conf/biboumi.cfg.lua" --destination="/etc/metronome/conf.d/$app.cfg.lua"
-
-chown metronome:metronome "/etc/metronome/conf.d/$app.cfg.lua"
-
-ynh_systemd_action --service_name=metronome --action="restart"
+ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
 
 #=================================================
 # CREATE DIRECTORIES
 #=================================================
-ynh_script_progression --message="Creating a data directory..."
-
-mkdir -p /var/lib/$app
+ynh_script_progression --message="Setting up the data directory..."
 
 # Set permissions to app files
 chown -R _biboumi:_biboumi "/var/lib/$app"
@@ -51,46 +25,37 @@ chown -R _biboumi:_biboumi "/var/lib/$app"
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..."
+ynh_script_progression --message="Updating $app's configuration files..." --weight=1
 
-ynh_add_config --template="../conf/biboumi.cfg" --destination="/etc/$app/$app.cfg"
+# Upgrade metronome component
+metronome_config_dir=$(_get_metronome_config_dir)
+ynh_add_config --template="metronome.cfg.lua" --destination="$metronome_config_dir/$app.cfg.lua"
+chown metronome:metronome "$metronome_config_dir/$app.cfg.lua"
+ynh_systemd_action --service_name=metronome --action="restart"
 
+# Upgrade biboumi configuration
+ynh_add_config --template="biboumi.cfg" --destination="/etc/$app/$app.cfg"
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
-# SETUP SYSTEMD
+# REAPPLY SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Upgrading system configurations related to $app..." --weight=1
 
 # Create a dedicated systemd config
-systemctl enable $app.service --quiet
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..."
-
-mkdir -p /var/log/$app
-chown -R _biboumi:_biboumi "/var/log/$app"
+systemctl enable "$app.service" --quiet
+yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
-
-yunohost service add $app --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
+chown -R _biboumi:_biboumi "/var/log/$app"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting $app's systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="start" --line_match="Started Biboumi" --log_path="systemd"
+ynh_systemd_action --service_name="$app" --action="start" --line_match="Authenticated with the XMPP server" --log_path="/var/log/$app/$app.log"
 
 #=================================================
 # END OF SCRIPT
