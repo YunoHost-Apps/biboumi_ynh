@@ -1,11 +1,7 @@
 #!/bin/bash
 
 #=================================================
-# COMMON VARIABLES
-#=================================================
-
-#=================================================
-# PERSONAL HELPERS
+# COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
 # Guess which xmpp server is running.
@@ -36,20 +32,12 @@ _configure_xmpp_server() {
     xmpp_app=$1
     config_filename=$(_get_xmpp_server_config_filename $xmpp_app)
     if [ $xmpp_app = prosody ] ; then
-        ynh_add_config --template="prosody.cfg.lua" --destination="$config_filename"
+        ynh_config_add --template="prosody.cfg.lua" --destination="$config_filename"
         chown prosody:prosody "/etc/$xmpp_app/conf.d/$app.cfg.lua"
     elif [ $xmpp_app = metronome ] ; then
-        ynh_add_config --template="prosody.cfg.lua" --destination="$config_filename"
+        ynh_config_add --template="prosody.cfg.lua" --destination="$config_filename"
         chown metronome:metronome "/etc/$xmpp_app/conf.d/$app.cfg.lua"
     else
         ynh_die "Failed to configure unsupported XMPP server $xmpp_app"
     fi
 }
-
-#=================================================
-# EXPERIMENTAL HELPERS
-#=================================================
-
-#=================================================
-# FUTURE OFFICIAL HELPERS
-#=================================================

@@ -28,16 +28,16 @@ fi
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
-shared_secret="$(ynh_string_random 25)"
-ynh_app_setting_set --app="$app" --key="shared_secret" --value="$shared_secret"
+shared_secret="$(ynh_string_random --length=25)"
+ynh_app_setting_set --key="shared_secret" --value="$shared_secret"
 
 admin_jid="${admin}@${app}.${domain}"
-ynh_app_setting_set --app="$app" --key="admin_jid" --value="$admin_jid"
+ynh_app_setting_set --key="admin_jid" --value="$admin_jid"
 
 #=================================================
 # CREATE DATA DIRECTORY
 #=================================================
-ynh_script_progression --message="Setting up the data directory..."
+ynh_script_progression "Setting up the data directory..."
 
 # Set permissions to app files
 chown -R _biboumi:_biboumi "/var/lib/$app"
@@ -45,43 +45,42 @@ chown -R _biboumi:_biboumi "/var/lib/$app"
 #=================================================
 # APP INITIAL CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding $app's configuration files..." --weight=1
+ynh_script_progression "Adding $app's configuration files..."
 
 # Stop the service started by apt install
-ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
+ynh_systemctl --service="$app" --action="stop" --log_path="systemd"
 
 # Setup integration with the running XMPP server (prosody or metronome)
 _configure_xmpp_server $xmpp_app
-ynh_systemd_action --service_name="$xmpp_app" --action="restart"
+ynh_systemctl --service="$xmpp_app" --action="restart"
 
 # Add biboumi configuration
 mkdir -p "/etc/$app/"
-ynh_add_config --template="biboumi.cfg" --destination="/etc/$app/$app.cfg"
+ynh_config_add --template="biboumi.cfg" --destination="/etc/$app/$app.cfg"
 chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
 
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+ynh_script_progression "Adding system configurations related to $app..."
 
 # Create a dedicated systemd config
 systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 # Use logrotate to manage application logfile(s)
-ynh_use_logrotate
-chown -R _biboumi:_biboumi "/var/log/$app"
+ynh_config_add_logrotate
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting $app's systemd service..." --weight=1
+ynh_script_progression "Starting $app's systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name="$app" --action="start" --line_match="Authenticated with the XMPP server" --log_path="/var/log/$app/$app.log"
+ynh_systemctl --service="$app" --action="start" --wait_until="Authenticated with the XMPP server"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed"
+ynh_script_progression "Installation of $app completed"
