@@ -16,6 +16,15 @@ if dpkg --compare-versions "$(uname -r)" "<=" "4.0"; then
 fi
 
 #=================================================
+# DETECT XMPP SERVER SOFTWARE TO INTEGRATE WITH
+#=================================================
+
+xmpp_app=$(_get_xmpp_app_name)
+if [ "${xmpp_app}z" = "z" ]; then
+    ynh_die "Could not detect XMPP server software to integrate with. Please install app 'prosody' (for example) or make sure the service is running and then try again!"
+fi
+
+#=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
@@ -41,11 +50,9 @@ ynh_script_progression --message="Adding $app's configuration files..." --weight
 # Stop the service started by apt install
 ynh_systemd_action --service_name="$app" --action="stop" --log_path="systemd"
 
-# Add metronome component
-metronome_config_dir=$(_get_metronome_config_dir)
-ynh_add_config --template="metronome.cfg.lua" --destination="$metronome_config_dir/$app.cfg.lua"
-chown metronome:metronome "$metronome_config_dir/$app.cfg.lua"
-ynh_systemd_action --service_name="metronome" --action="restart"
+# Setup integration with the running XMPP server (prosody or metronome)
+_configure_xmpp_server $xmpp_app
+ynh_systemd_action --service_name="$xmpp_app" --action="restart"
 
 # Add biboumi configuration
 mkdir -p "/etc/$app/"

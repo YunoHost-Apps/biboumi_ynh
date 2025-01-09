@@ -8,20 +8,42 @@
 # PERSONAL HELPERS
 #=================================================
 
-_get_metronome_config_dir() {
-    if [[ $YNH_DEBIAN_VERSION == "bullseye" ]]; then
-        echo "/etc/metronome/conf.d"
-        return 0
-    fi
+# Guess which xmpp server is running.
+_get_xmpp_app_name() {
+    for candidate in prosody metronome ; do
+        if systemctl is-active prosody -q ; then
+            echo $candidate
+            return 0
+        fi
+    done
+    ynh_die "Failed to guess the XMPP server software running"
+}
 
-    # multi_instance=false, there's only one
-    metronome_app=$(yunohost app list --json | jq -r '.apps[] | select(.id == "metronome") | .id')
-    if [[ -z "${metronome_app:-}" ]]; then
-        ynh_print_warn --message="Could not find any metronome app!"
-        return 1
+# Compute the config filename where the XMPP component for biboumi is configured.
+_get_xmpp_server_config_filename() {
+    xmpp_app=$1
+    if [ $xmpp_app = prosody ] ; then
+        echo "/etc/$xmpp_app/conf.d/$app.cfg.lua"
+    elif [ $xmpp_app = metronome ] ; then
+        echo "/etc/$xmpp_app/conf.d/$app.cfg.lua"
+    else
+        ynh_die "Failed to configure unsupported XMPP server $xmpp_app"
     fi
+}
 
-    echo "$(ynh_app_setting_get --app="$metronome_app" --key="install_dir")/conf/conf.d"
+# Configure biboumi as an XMPP component for the running XMPP server.
+_configure_xmpp_server() {
+    xmpp_app=$1
+    config_filename=$(_get_xmpp_server_config_filename $xmpp_app)
+    if [ $xmpp_app = prosody ] ; then
+        ynh_add_config --template="prosody.cfg.lua" --destination="$config_filename"
+        chown prosody:prosody "/etc/$xmpp_app/conf.d/$app.cfg.lua"
+    elif [ $xmpp_app = metronome ] ; then
+        ynh_add_config --template="prosody.cfg.lua" --destination="$config_filename"
+        chown metronome:metronome "/etc/$xmpp_app/conf.d/$app.cfg.lua"
+    else
+        ynh_die "Failed to configure unsupported XMPP server $xmpp_app"
+    fi
 }
 
 #=================================================

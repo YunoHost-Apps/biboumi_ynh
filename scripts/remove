@@ -8,6 +8,13 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# DETECT XMPP SERVER SOFTWARE IN USE
+#=================================================
+
+xmpp_app=$(_get_xmpp_app_name)
+config_filename=$(_get_xmpp_server_config_filename $xmpp_app)
+
+#=================================================
 # REMOVE SYSTEM CONFIGURATIONS
 #=================================================
 ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
@@ -36,8 +43,8 @@ ynh_secure_remove --file="/var/lib/$app"
 ynh_secure_remove --file="/etc/$app"
 
 # Remove Metronome component
-ynh_secure_remove --file="$(_get_metronome_config_dir)/$app.cfg.lua"
-ynh_systemd_action --action=restart --service_name=metronome
+ynh_secure_remove --file="$config_filename"
+ynh_systemd_action --action=restart --service_name=$xmpp_app
 
 #=================================================
 # END OF SCRIPT

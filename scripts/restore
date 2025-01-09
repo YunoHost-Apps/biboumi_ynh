@@ -18,6 +18,13 @@ if dpkg --compare-versions "$(uname -r)" "<=" "4.0"; then
 fi
 
 #=================================================
+# DETECT XMPP SERVER SOFTWARE IN USE
+#=================================================
+
+xmpp_app=$(_get_xmpp_app_name)
+config_filename=$(_get_xmpp_server_config_filename $xmpp_app)
+
+#=================================================
 # RESTORE THE DATA DIRECTORY
 #=================================================
 ynh_script_progression --message="Restoring the data directory..." --weight=1
@@ -33,10 +40,9 @@ ynh_script_progression --message="Restoring various files..."
 ynh_restore_file --origin_path="/etc/$app"
 chown -R _biboumi:_biboumi "/etc/$app"
 
-metronome_config_dir=$(_get_metronome_config_dir)
-ynh_restore_file --origin_path="$metronome_config_dir/$app.cfg.lua"
-chown metronome:metronome "$metronome_config_dir/$app.cfg.lua"
-ynh_systemd_action --service_name=metronome --action="restart"
+ynh_restore_file --origin_path="$config_filename"
+chown $xmpp_app: "$config_filename"
+ynh_systemd_action --service_name=$xmpp_app --action="restart"
 
 #=================================================
 # RESTORE SYSTEM CONFIGURATIONS
