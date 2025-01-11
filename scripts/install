@@ -52,7 +52,7 @@ ynh_systemctl --service="$xmpp_app" --action="restart"
 # Add biboumi configuration
 mkdir -p "/etc/$app/"
 ynh_config_add --template="biboumi.cfg" --destination="/etc/$app/$app.cfg"
-chown -R _biboumi:_biboumi "/etc/$app/$app.cfg"
+chmod 644 "/etc/$app/$app.cfg"
 
 #=================================================
 # SYSTEM CONFIGURATION
