@@ -53,7 +53,7 @@ systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 # Use logrotate to manage app-specific logfile(s)
-ynh_config_add_logrotate
+_ynh_config_add_logrotate_for_biboumi
 
 #=================================================
 # START SYSTEMD SERVICE
