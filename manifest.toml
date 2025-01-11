@@ -44,6 +44,9 @@ ram.runtime = "50M"
     [resources.ports]
     main.default = 113
 
+    [resources.apt]
+    packages = [ "biboumi", ]
+
     [resources.data_dir]
     dir = "/var/lib/__APP__"
     owner = "_biboumi:rwx"
@@ -51,5 +54,3 @@ ram.runtime = "50M"
 
     [resources.permissions]
 
-    [resources.apt]
-    packages = [ "biboumi", ]
