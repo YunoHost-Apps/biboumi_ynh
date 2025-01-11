@@ -35,14 +35,6 @@ admin_jid="${admin}@${app}.${domain}"
 ynh_app_setting_set --key="admin_jid" --value="$admin_jid"
 
 #=================================================
-# CREATE DATA DIRECTORY
-#=================================================
-ynh_script_progression "Setting up the data directory..."
-
-# Set permissions to app files
-chown -R _biboumi:_biboumi "/var/lib/$app"
-
-#=================================================
 # APP INITIAL CONFIGURATION
 #=================================================
 ynh_script_progression "Adding $app's configuration files..."
@@ -51,7 +43,10 @@ ynh_script_progression "Adding $app's configuration files..."
 ynh_systemctl --service="$app" --action="stop" --log_path="systemd"
 
 # Setup integration with the running XMPP server (prosody or metronome)
+ynh_script_progression "Configuring XMPP server $xmpp_app to integrate with biboumi..."
 _configure_xmpp_server $xmpp_app
+
+ynh_script_progression "Restarting service $xmpp_app..."
 ynh_systemctl --service="$xmpp_app" --action="restart"
 
 # Add biboumi configuration
@@ -69,7 +64,9 @@ systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="XMPP gateway for the IRC network" --log="/var/log/$app/$app.log"
 
 # Use logrotate to manage application logfile(s)
-ynh_config_add_logrotate
+## FIXME the helper v2.1 "ynh_config_add_logrotate" wants to "chown biboumi:biboumi /var/log/biboumi" and thus breaks everything.
+## For the time being, let's create our logrotate config with our custom helper.
+_ynh_config_add_logrotate_for_biboumi
 
 #=================================================
 # START SYSTEMD SERVICE

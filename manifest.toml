@@ -44,12 +44,10 @@ ram.runtime = "50M"
     [resources.ports]
     main.default = 113
 
-    [resources.system_user]
-
-    [resources.install_dir]
-
     [resources.data_dir]
     dir = "/var/lib/__APP__"
+    owner = "_biboumi:rwx"
+    group = "_biboumi:rx"
 
     [resources.permissions]
 

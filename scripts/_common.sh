@@ -41,3 +41,31 @@ _configure_xmpp_server() {
         ynh_die "Failed to configure unsupported XMPP server $xmpp_app"
     fi
 }
+
+_ynh_config_add_logrotate_for_biboumi() {
+    mkdir --parents /var/log/$app
+    chmod 750 /var/log/$app
+    chown _biboumi:_biboumi /var/log/$app
+
+    echo > /etc/logrotate.d/$app <<EOF
+/var/log/$app/$app.log {
+    # Rotate if the logfile exceeds 100Mo
+    size 100M
+    # Keep 12 old log maximum
+    rotate 12
+    # Compress the logs with gzip
+    compress
+    # Compress the log at the next cycle. So keep always 2 non compressed logs
+    delaycompress
+    # Copy and truncate the log to allow to continue write on it. Instead of moving the log.
+    copytruncate
+    # Do not trigger an error if the log is missing
+    missingok
+    # Do not rotate if the log is empty
+    notifempty
+    # Keep old logs in the same dir
+    noolddir
+}
+EOF
+    chmod 644 "/etc/logrotate.d/$app"
+}
