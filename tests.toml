@@ -6,6 +6,6 @@ test_format = 1.0
 
     preinstall = """
     if cat /etc/os-release | grep --quiet bookworm 2>/dev/null; then
-        yunohost app install --force https://github.com/yunoHost-Apps/metronome_ynh/tree/testing -a 'domain=domain.tld&init_main_permission=visitors'
+        yunohost app install --force https://github.com/yunoHost-Apps/prosody_ynh/tree/testing -a 'domain=domain.tld&import_from_metronome=0'
     fi
     """

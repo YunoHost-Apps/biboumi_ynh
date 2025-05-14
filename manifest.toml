@@ -7,7 +7,7 @@ name = "Biboumi"
 description.en = "XMPP gateway for the IRC network"
 description.fr = "Passerelle XMPP pour le réseau IRC"
 
-version = "8.3~ynh3"
+version = "9.0~ynh1"
 
 maintainers = ["pitchum"]
 
@@ -18,7 +18,8 @@ admindoc = "https://doc.biboumi.louiz.org"
 code = "https://github.com/louiz/biboumi"
 
 [integration]
-yunohost = ">= 11.2"
+yunohost = ">= 12.0"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = false
 
@@ -43,20 +44,13 @@ ram.runtime = "50M"
     [resources.ports]
     main.default = 113
 
-    [resources.system_user]
-
-    [resources.install_dir]
-
-    [resources.data_dir]
-    dir = "/var/lib/__APP__"
-
-    [resources.permissions]
-
     [resources.apt]
     packages = [ "biboumi", ]
 
-    packages_from_raw_bash = """
-        if [[ $YNH_DEBIAN_VERSION == "bullseye" ]]; then
-            echo "metronome";
-        fi
-    """
+    [resources.data_dir]
+    dir = "/var/lib/__APP__"
+    owner = "_biboumi:rwx"
+    group = "_biboumi:rx"
+
+    [resources.permissions]
+
