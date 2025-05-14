@@ -20,7 +20,7 @@ fi
 #=================================================
 
 xmpp_app=$(_get_xmpp_app_name)
-if [ "${xmpp_app}z" = "z" ]; then
+if [[ -z "${xmpp_app:-}" ]]; then
     ynh_die "Could not detect XMPP server software to integrate with. Please install app 'prosody' (for example) or make sure the service is running and then try again!"
 fi
 
